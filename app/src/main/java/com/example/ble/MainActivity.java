@@ -244,6 +244,9 @@ public class MainActivity extends AppCompatActivity {
         if(my_item == R.id.NetworkViewItem){
             intent=new Intent(MainActivity.this,NetworkMapActivity.class);
             startActivity(intent);
+        } else if (my_item == R.id.TheIdleLoginItem) {
+            intent=new Intent(MainActivity.this,SocketActivity.class);
+            startActivity(intent);
         }
 
         return true;

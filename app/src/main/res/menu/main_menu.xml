@@ -4,4 +4,7 @@
     <item android:id="@+id/NetworkViewItem"
         android:title="网络端查看"/>
 
+    <item android:id="@+id/TheIdleLoginItem"
+        android:title="网页登录"/>
+
 </menu>
