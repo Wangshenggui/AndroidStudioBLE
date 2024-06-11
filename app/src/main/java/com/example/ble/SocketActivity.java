@@ -15,6 +15,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,11 +27,14 @@ import java.net.Socket;
 
 public class SocketActivity extends AppCompatActivity {
 
-    EditText iptoedit;//ip编辑框对象
-    EditText porttoedit;//端口编辑框对象
-    EditText datatoedit;//数据编辑框对象
-    Button Button;//连接服务器按钮对象
-    EditText edittotext;//接收的数据显示编辑框对象
+    EditText IPEdit;//ip编辑框对象
+    EditText portEdit;//端口编辑框对象
+    EditText dataEdit;//数据编辑框对象
+    Button ConnectButton;//连接服务器按钮对象
+    EditText editText;//接收的数据显示编辑框对象
+    TextView testTextView;//JSON解析测试
+
+
     Socket Socket = null;//Socket
     boolean buttontitle = true;//定义一个逻辑变量，用于判断连接服务器按钮状态
     boolean RD = false;//用于控制读数据线程是否执行
@@ -41,11 +48,15 @@ public class SocketActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_socket);
 
-        iptoedit = (EditText) findViewById(R.id.IPEdit);//获取ip地址编辑框对象
-        porttoedit = (EditText) findViewById(R.id.portEdit);//获取端口编辑框对象
-        datatoedit = (EditText) findViewById(R.id.dataEdit);//获取欲发送的数据编辑框对象
-        Button = (Button) findViewById(R.id.Button);//获取连接服务器按钮对象
-        edittotext = (EditText) findViewById(R.id.editText);//获取接收数据显示编辑框对象
+        IPEdit = (EditText) findViewById(R.id.IPEdit);//获取ip地址编辑框对象
+        portEdit = (EditText) findViewById(R.id.portEdit);//获取端口编辑框对象
+        dataEdit = (EditText) findViewById(R.id.dataEdit);//获取欲发送的数据编辑框对象
+        ConnectButton = (Button) findViewById(R.id.ConnectButton);//获取连接服务器按钮对象
+        editText = (EditText) findViewById(R.id.editText);//获取接收数据显示编辑框对象
+        testTextView = (TextView) findViewById(R.id.testTextView);
+
+        //自动连接
+        link(new View(this));
     }
 
     //连接服务器按钮按下
@@ -60,10 +71,10 @@ public class SocketActivity extends AppCompatActivity {
             Connect_Thread Connect_thread = new Connect_Thread();
             Connect_thread.start();
             //改变按钮标题
-            Button.setText("断 开 连 接");
+            ConnectButton.setText("断 开 连 接");
         } else {
             //如果按钮已经被按下，则改变按钮标题
-            Button.setText("连 接 服 务 器");
+            ConnectButton.setText("连 接 服 务 器");
             //储存状态的变量反转
             buttontitle = true;
             try {
@@ -90,9 +101,9 @@ public class SocketActivity extends AppCompatActivity {
                 if (Socket == null) {
                     //如果socket为空则执行
                     //获取输入的IP地址
-                    ipAddress = InetAddress.getByName(iptoedit.getText().toString());
+                    ipAddress = InetAddress.getByName(IPEdit.getText().toString());
                     //获取输入的端口
-                    int port = Integer.valueOf(porttoedit.getText().toString());
+                    int port = Integer.valueOf(portEdit.getText().toString());
                     //新建一个socket
                     Socket = new Socket(ipAddress, port);
                     //获取socket的输入流和输出流
@@ -135,26 +146,24 @@ public class SocketActivity extends AppCompatActivity {
                         Socket.close();
                         Socket = null;
                         buttontitle = true;
-                        Button.setText("连 接 服 务 器");
+                        ConnectButton.setText("连 接 服 务 器");
                     } else {
-                        //如果有数据正常返回则进行处理显示
-
-                                                 /*
-                             这个地方有个很大的坑，让我搞了不少的时间
-                             我用其他语言写的Web服务器程序，默认编码是gb2312
-                             AS的默认编码是utf-8
-                             在获取服务器发来的数据的时候，程序已经对这段gb2312的数据进行编码...
-                             至于编码是什么就不知道了
-                             我研究了很长时间，怎么转码也不对，越转越乱
-                             最后测试出来是gb2312编码已经被转码了，我就先恢复gb2312编码
-                             然后转成程序不会乱码的utf-8
-                             如果目标服务器编码是utf8的话就不用转了
-                         */
-
                         //先恢复成GB2312编码
                         textdata = new String(ReadBuffer, 0, ReadBufferLengh, "GB2312");//原始编码数据
                         //转为UTF-8编码后显示在编辑框中
-                        edittotext.setText(new String(textdata.getBytes(), "UTF-8"));
+                        editText.setText(new String(textdata.getBytes(), "UTF-8"));
+
+                        try {
+                            JSONObject jsonObject = new JSONObject(textdata);
+
+                            String lng = jsonObject.getString("lng");
+
+                            testTextView.setText("你干嘛" + lng);
+                        } catch (JSONException e) {
+                            // 处理解析错误
+                            e.printStackTrace();
+                        }
+
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -163,43 +172,6 @@ public class SocketActivity extends AppCompatActivity {
         }
     }
 
-    //用线程发送数据
-    class ThreadSendData extends Thread {
-        public void run() {
-            try {
-                //用输出流发送数据
-                OutputStream.write(datatoedit.getText().toString().getBytes());
-                //发送数据之后会自动断开连接，所以，恢复为最初的状态
-                //有个坑要说一下，因为发送完数据还得等待服务器返回，所以，不能把Socket也注销掉
-                buttontitle = true;
-                //改变按钮标题
-                Button.setText("连 接 服 务 器");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    //验证编辑框内容是否合法
-    public boolean thisif() {
-        //定义一个信息框留作备用
-        AlertDialog.Builder message = new AlertDialog.Builder(this);
-        message.setPositiveButton("确定", click1);
-
-        //分别获取ip、端口、数据这三项的内容
-        String ip = iptoedit.getText().toString();
-        String port = porttoedit.getText().toString();
-        String data = datatoedit.getText().toString();
-
-        //判断是否有编辑框为空
-        if (ip == null || ip.length() == 0 || port == null || port.length() == 0 || data == null || data.length() == 0) {
-            AlertDialog m1 = message.create();
-            m1.show();
-            return false;
-        } else {
-            return true;
-        }
-    }
 
     //信息框按钮按下事件
     public DialogInterface.OnClickListener click1 = new DialogInterface.OnClickListener() {

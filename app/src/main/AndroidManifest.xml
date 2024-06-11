@@ -26,7 +26,7 @@
         <activity
             android:name=".SocketActivity"
             android:exported="false"
-            android:label="Socket测试"/>
+            android:label="TCP客户端测试"/>
         <activity
             android:name=".NetworkMapActivity"
             android:exported="false"

@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         HDOPViewText=findViewById(R.id.HDOPViewText);
         AltitudeViewText=findViewById(R.id.AltitudeViewText);
         PositioningModeViewText=findViewById(R.id.PositioningModeViewText);
+        TxButt=(Button) findViewById(R.id.TxButt);
 
 
 
@@ -93,11 +94,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //获取按钮ID
-        TxButt=(Button) findViewById(R.id.TxButt);
+
         TxButt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //暂时不做发送处理
+                /*
                 num+=2;
                 wheelData[0] = num;
                 wheelData[1] = num+1;
@@ -108,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace(); // 这里可以处理异常，比如打印异常信息或者做其他适当的处理
                 }
+                 */
             }
         });
     }
