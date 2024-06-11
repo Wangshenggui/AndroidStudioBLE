@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, orientation=landscape">
+		<style type="text/css">
+			body,
+			html {
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+				margin: 0;
+				font-family: "微软雅黑";
+				display: flex;
+				flex-direction: column;
+				/* 将子元素垂直排列 */
+			}
+
+			#mapContainer {
+				width: 100%;
+				height: 50%;
+				/* 设置地图容器高度为屏幕高度的50% */
+			}
+
+			#infoContainer {
+				width: 100%;
+				height: 50%;
+				/* 设置信息栏高度为屏幕高度的50% */
+				overflow-y: auto;
+				background-color: rgba(255, 255, 255, 0.9);
+				padding: 1px;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			}
+
+			#statusBar {
+				margin-bottom: 20px;
+				display: flex;
+				flex-wrap: wrap;
+				/* 允许自动换行 */
+				justify-content: space-between;
+			}
+
+			#statusBar span {
+				width: 48%;
+				margin-bottom: 8px;
+			}
+
+			#dateTimeInfo {
+				white-space: nowrap;
+				/* 防止文本换行 */
+			}
+
+			.mapButton {
+				position: absolute;
+				top: 10px;
+				right: 10px;
+				padding: 8px 16px;
+				background-color: #8cadf4;
+				color: white;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+				z-index: 9999;
+			}
+
+			#clearButton {
+				top: 10px;
+			}
+
+			#pauseButton {
+				top: 50px;
+			}
+
+			#satelliteButton {
+				top: 90px;
+			}
+
+			#connectButton {
+				top: 130px;
+			}
+
+
+
+
+
+
+
+			.statusDot {
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				position: absolute;
+				bottom: 10px;
+				right: 12px;
+				left: 48px;
+			}
+
+			.statusText {
+				position: absolute;
+				bottom: 6px;
+				left: 80px;
+				color: black;
+			}
+
+
+
+
+			/* 菜单按钮样式 */
+			.menuButton {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				font-size: 30px;
+				cursor: pointer;
+				z-index: 9999;
+			}
+
+			/* 菜单容器样式 */
+			#menuContainer {
+				position: fixed;
+				top: 50px;
+				left: -40%;
+				width: 40%;
+				height: 100%;
+				background-color: #fff;
+				transition: left 0.3s;
+				z-index: 999;
+			}
+
+
+			/* 菜单列表项样式 */
+			#menuContainer ul {
+				list-style: none;
+				padding: 0;
+			}
+
+			#menuContainer li {
+				margin-bottom: 10px;
+			}
+
+			#menuContainer a {
+				text-decoration: none;
+				color: #333;
+				font-size: 18px;
+				margin-left: 10px;
+			}
+
+			/* 菜单项之间添加横线 */
+			#menuContainer li+li::before {
+				content: '';
+				display: block;
+				border-top: 1px solid #ccc;
+				margin: 10px 0;
+			}
+		</style>
+		<script type="text/javascript"
+			src="http://api.map.baidu.com/api?type=webgl&v=1.0&ak=d1DPSzE2ISf4yimNuIksZzzJ9ayxdprk"></script>
+		<title>地图打点</title>
+	</head>
+	<body>
+		<!-- 菜单按钮 -->
+		<div id="menuButton" class="menuButton">&#9776;</div>
+		<!-- 菜单容器 -->
+		<div id="menuContainer"></div>
+
+
+		<div id="mapContainer">
+			<button id="clearButton" class="mapButton">清除轨迹</button>
+			<button id="pauseButton" class="mapButton">暂停绘制</button>
+			<button id="satelliteButton" class="mapButton">卫星地图</button>
+			<button id="connectButton" class="mapButton">连接服务器</button>
+			<div id="allmap" style="width: 100%; height: 100%;"></div>
+		</div>
+		<div id="infoContainer">
+			<div id="statusBar">
+				<span id="speedInfo">速度: 0</span>
+				<span id="altitudeInfo">海拔高度: 0 米</span>
+				<span id="rtkStateInfo">RTK状态: 0</span>
+				<span id="rtkNumInfo">卫星数量: 0</span>
+				<span id="bd09lngInfo">BD09经度: 0</span>
+				<span id="bd09latInfo">BD09纬度: 0</span>
+				<span id="bd09lngdmsInfo">BD09经度: 0</span>
+				<span id="bd09latdmsInfo">BD09纬度: 0</span>				
+				
+				<span id="gcj02lngInfo">GCJ02经度: 0</span>
+				<span id="gcj02latInfo">GCJ02纬度: 0</span>
+				<span id="gcj02lngdmsInfo">GCJ02经度: 0</span>
+				<span id="gcj02latdmsInfo">GCJ02纬度: 0</span>				
+				
+				<span id="wgs84lngInfo">WGS84经度: 0</span>
+				<span id="wgs84latInfo">WGS84纬度: 0</span>
+				<span id="wgs84lngdmsInfo">WGS84经度: 0</span>
+				<span id="wgs84latdmsInfo">WGS84纬度: 0</span>
+
+				<span id="dateTimeInfo">日期时间: </span>
+			</div>
+
+
+
+		</div>
+
+	</body>
+</html>
+
+
+
+<script type="text/javascript">
+	var bmap = new BMapGL.Map("allmap"); // 创建地图实例
+	var lastPoint = null; // 上一个位置点
+	var ws = null; // WebSocket 连接对象
+	var isPaused = false; // 是否暂停绘制轨迹
+	var isSatelliteMode = false; // 是否是卫星地图模式
+	// 初始化默认值
+	var speed;
+	var rtkState;
+	var rtkNum;
+	var lng;
+	var lat;
+
+	// 添加地图缩放控件
+	var zoomControl = new BMapGL.ZoomControl();
+	bmap.addControl(zoomControl);
+
+	// 启用双指缩放
+	bmap.enablePinchToZoom();
+
+	// 更新日期和时间信息
+	function updateDateTime() {
+		var now = new Date();
+		var dateStr = now.toLocaleDateString();
+		var timeStr = now.toLocaleTimeString();
+		document.getElementById('dateTimeInfo').textContent = '日期时间: ' + dateStr + ' ' + timeStr;
+	}
+
+	// 初始加载页面时更新一次日期和时间
+	updateDateTime();
+
+	// 每秒更新一次日期和时间
+	setInterval(updateDateTime, 1000);
+
+	// 定义连接服务器函数
+	function connectToServer() {
+		ws = new WebSocket("ws://8.137.81.229:8880");
+
+		// WebSocket连接建立时的回调函数
+		ws.onopen = function() {
+			console.log("WebSocket连接已建立.");
+		};
+
+		// WebSocket接收到消息时的回调函数
+		ws.onmessage = function(event) {
+			// 解析收到的消息数据
+			var data = JSON.parse(event.data);
+
+			// 处理第一条消息，用于显示地图信息
+			if (data.lng !== undefined && data.lat !== undefined) {
+				// 更新地图信息
+				updateMapInfo(data);
+			}
+
+			// 处理第二条消息，用于显示电机转速
+			if (data.S1 !== undefined) {
+				// 更新电机转速信息
+
+			}
+		};
+
+		// WebSocket连接关闭时的回调函数
+		ws.onclose = function() {
+			console.log("WebSocket连接已关闭.");
+		};
+	}
+
+	// 更新地图信息函数
+	function updateMapInfo(data) {
+		speed = data.speed;
+		rtkState = data.rtkstate;
+		rtkNum = data.rtknum;
+		lng = data.lng;
+		lat = data.lat;
+		var altitude = data.altitude || 0;
+
+
+		// 提取经度和纬度
+		var currentPoint = new BMapGL.Point(lng, lat);
+	
+	var bd09lngdms = convertToDMS(lng);
+		var bd09latdms = convertToDMS(lat);
+		
+		var gcj02lng = bd09ToGcj02(lng, lat).lng;
+		var gcj02lat = bd09ToGcj02(lng, lat).lat;
+
+		var gcj02lngdms = convertToDMS(gcj02lng);
+		var gcj02latdms = convertToDMS(gcj02lat);
+
+
+		var wgs84lng = gcj02ToWgs84(lng, lat).lng;
+		var wgs84lat = gcj02ToWgs84(lng, lat).lat;
+		var wgs84lngdms = convertToDMS(wgs84lng);
+		var wgs84latdms = convertToDMS(wgs84lat);
+
+
+		// 更新页面显示
+		document.getElementById('speedInfo').textContent = '速度: ' + speed + 'km/h';
+		document.getElementById('rtkStateInfo').textContent = 'RTK状态: ' + getRTKStateText(rtkState);
+		document.getElementById('rtkNumInfo').textContent = '卫星数量: ' + rtkNum;
+		document.getElementById('bd09lngInfo').textContent = 'BD09坐标经度: ' + lng;
+		document.getElementById('bd09latInfo').textContent = 'BD09坐标纬度: ' + lat;
+		document.getElementById('bd09lngdmsInfo').textContent = 'BD09坐标经度: ' + bd09lngdms;
+		document.getElementById('bd09latdmsInfo').textContent = 'BD09坐标纬度: ' + bd09latdms;		
+		
+		
+		document.getElementById('gcj02lngInfo').textContent = 'GCJ02坐标经度: ' + gcj02lng;
+		document.getElementById('gcj02latInfo').textContent = 'GCJ02坐标纬度: ' + gcj02lat;
+	document.getElementById('gcj02lngdmsInfo').textContent = 'GCJ02坐标经度(*): ' + gcj02lngdms;
+	document.getElementById('gcj02latdmsInfo').textContent = 'GCJ02坐标纬度(*): ' + gcj02latdms;		
+		
+		
+		document.getElementById('wgs84lngInfo').textContent = 'WGS84坐标经度: ' + wgs84lng;
+		document.getElementById('wgs84latInfo').textContent = 'WGS84坐标纬度: ' + wgs84lat;
+	document.getElementById('wgs84lngdmsInfo').textContent = 'WGS84坐标经度: ' + wgs84lngdms;
+	document.getElementById('wgs84latdmsInfo').textContent = 'WGS84坐标纬度: ' + wgs84latdms;
+
+
+		document.getElementById('altitudeInfo').textContent = '海拔高度: ' + altitude + '米';
+
+
+
+		// 如果地图尚未初始化，则将地图中心点设置为接收到的位置
+		if (!bmap.isInitialized) {
+			bmap.centerAndZoom(currentPoint, 17); // 设置地图中心点和缩放级别
+			bmap.isInitialized = true; // 标记地图已初始化
+		}
+
+		// 如果未暂停绘制轨迹，则进行绘制
+		if (!isPaused) {
+			// 创建当前位置点并在地图上标记				
+
+			// 使用自定义图标
+			var myIcon = new BMapGL.Icon("img/point.png", new BMapGL.Size(6, 6));
+
+			var marker = new BMapGL.Marker(currentPoint, {
+				icon: myIcon
+			});
+
+			//	var marker = new BMapGL.Marker(currentPoint); // 不指定图标参数，使用默认图标
+			bmap.addOverlay(marker);
+
+			// 设置地图中心点为当前位置
+			bmap.setCenter(currentPoint);
+
+			// 绘制轨迹
+			if (lastPoint !== null) {
+				var polyline = new BMapGL.Polyline([lastPoint, currentPoint], {
+					strokeColor: "red",
+					strokeWeight: 5,
+					strokeOpacity: 0.5
+				}); // 调整轨迹线的粗细为 5
+				bmap.addOverlay(polyline);
+			}
+		}
+
+		// 更新上一个位置点
+		lastPoint = currentPoint;
+	}
+
+	// 根据RTK状态值返回对应的文本
+	function getRTKStateText(rtkState) {
+		switch (rtkState) {
+			case 0:
+				return '无定位';
+			case 1:
+				return '单点定位';
+			case 2:
+				return '亚米级定位';
+			case 4:
+				return 'RTK固定解';
+			case 5:
+				return 'RTK浮动解';
+			default:
+				return '未知';
+		}
+	}
+
+
+
+
+
+	// 清除轨迹函数
+	function clearTrack() {
+		bmap.clearOverlays(); // 清除地图上的所有覆盖物
+		lastPoint = null; // 重置上一个位置点
+	}
+
+	// 暂停绘制轨迹函数
+	function pauseDrawing() {
+		isPaused = !isPaused; // 切换暂停状态
+		var pauseButton = document.getElementById('pauseButton');
+		pauseButton.textContent = isPaused ? '继续绘制' : '暂停绘制'; // 更新按钮文本
+	}
+
+
+	// 切换地图到卫星地图模式或普通地图模式
+	function toggleSatelliteMode() {
+		if (isSatelliteMode) {
+			// 切换到普通地图模式
+			bmap.setMapType(BMAP_NORMAL_MAP);
+			isSatelliteMode = false;
+		} else {
+			// 切换到卫星地图模式
+			bmap.setMapType(BMAP_EARTH_MAP);
+			isSatelliteMode = true;
+		}
+	}
+
+	// 页面加载时自动连接服务器
+	connectToServer();
+
+	// 清除轨迹按钮点击事件监听
+	document.getElementById('clearButton').addEventListener('click', clearTrack);
+
+	// 暂停绘制按钮点击事件监听
+	document.getElementById('pauseButton').addEventListener('click', pauseDrawing);
+
+	// 切换地图模式按钮点击事件监听
+	document.getElementById('satelliteButton').addEventListener('click', toggleSatelliteMode);
+
+
+	// 添加连接服务器按钮点击事件处理函数
+	document.getElementById('connectButton').onclick = function() {
+		// 调用连接服务器函数以建立WebSocket连接
+		connectToServer();
+	};
+
+	document.addEventListener('DOMContentLoaded', function() {
+		var menuButton = document.getElementById('menuButton');
+		var menuContainer = document.getElementById('menuContainer');
+		var isMenuVisible = false; // 记录菜单的显示状态，默认为隐藏
+
+		// 添加菜单链接
+		var menuContent = '<ul>' +
+			'<li><a href="index.html">首页</a></li>' +
+			'<li><a href="motor.html">电机控制</a></li>' +
+			'<li><a href="lte.html">配置4G模块</a></li>' +
+			'<li><a href="rtk.html">配置RTK模块</a></li>' +
+			'<li><a href="map.html">地图打点</a></li>' +
+			'</ul>';
+		menuContainer.innerHTML = menuContent;
+
+		// 菜单按钮点击事件处理函数
+		menuButton.addEventListener('click', function() {
+			isMenuVisible = !isMenuVisible; // 反转菜单的显示状态
+			menuContainer.style.left = isMenuVisible ? '0' : '-40%';
+		});
+
+		// 单击其他地方菜单缩回
+		document.addEventListener('click', function(event) {
+			if (event.target !== menuButton && !menuContainer.contains(event.target)) {
+				isMenuVisible = false; // 隐藏菜单
+				menuContainer.style.left = '-40%';
+			}
+		});
+
+		// 单击地图区域时菜单缩回
+		document.getElementById('mapContainer').addEventListener('click', function() {
+			isMenuVisible = false; // 隐藏菜单
+			menuContainer.style.left = '-40%';
+		});
+	});
+
+
+	function bd09ToGcj02(bd_lon, bd_lat) {
+		var x_pi = 3.14159265358979324 * 3000.0 / 180.0;
+		var x = bd_lon - 0.0065;
+		var y = bd_lat - 0.006;
+		var z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_pi);
+		var theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * x_pi);
+		var gg_lon = z * Math.cos(theta);
+		var gg_lat = z * Math.sin(theta);
+		return {
+			lng: gg_lon,
+			lat: gg_lat
+		};
+	}
+
+
+
+	function gcj02ToWgs84(lng, lat) {
+		var a = 6378245.0;
+		var ee = 0.00669342162296594323;
+
+		var dlat = transformLat(lng - 105.0, lat - 35.0);
+		var dlng = transformLon(lng - 105.0, lat - 35.0);
+		var radLat = lat / 180.0 * Math.PI;
+		var magic = Math.sin(radLat);
+		magic = 1 - ee * magic * magic;
+		var sqrtMagic = Math.sqrt(magic);
+		dlat = (dlat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * Math.PI);
+		dlng = (dlng * 180.0) / (a / sqrtMagic * Math.cos(radLat) * Math.PI);
+		var mgLat = lat + dlat;
+		var mgLng = lng + dlng;
+		return {
+			lng: lng * 2 - mgLng,
+			lat: lat * 2 - mgLat
+		};
+	}
+
+	function transformLat(lng, lat) {
+		var ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * lat + 0.1 * lng * lat + 0.2 * Math.sqrt(Math.abs(lng));
+		ret += (20.0 * Math.sin(6.0 * lng * Math.PI) + 20.0 * Math.sin(2.0 * lng * Math.PI)) * 2.0 / 3.0;
+		ret += (20.0 * Math.sin(lat * Math.PI) + 40.0 * Math.sin(lat / 3.0 * Math.PI)) * 2.0 / 3.0;
+		ret += (160.0 * Math.sin(lat / 12.0 * Math.PI) + 320 * Math.sin(lat * Math.PI / 30.0)) * 2.0 / 3.0;
+		return ret;
+	}
+
+	function transformLat(lng, lat) {
+		var ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * lat + 0.1 * lng * lat + 0.2 * Math.sqrt(Math.abs(lng));
+		ret += (20.0 * Math.sin(6.0 * lng * Math.PI) + 20.0 * Math.sin(2.0 * lng * Math.PI)) * 2.0 / 3.0;
+		ret += (20.0 * Math.sin(lat * Math.PI) + 40.0 * Math.sin(lat / 3.0 * Math.PI)) * 2.0 / 3.0;
+		ret += (160.0 * Math.sin(lat / 12.0 * Math.PI) + 320 * Math.sin(lat * Math.PI / 30.0)) * 2.0 / 3.0;
+		return ret;
+	}
+
+	function transformLon(lng, lat) {
+		var ret = 300.0 + lng + 2.0 * lat + 0.1 * lng * lng + 0.1 * lng * lat + 0.1 * Math.sqrt(Math.abs(lng));
+		ret += (20.0 * Math.sin(6.0 * lng * Math.PI) + 20.0 * Math.sin(2.0 * lng * Math.PI)) * 2.0 / 3.0;
+		ret += (20.0 * Math.sin(lng * Math.PI) + 40.0 * Math.sin(lng / 3.0 * Math.PI)) * 2.0 / 3.0;
+		ret += (150.0 * Math.sin(lng / 12.0 * Math.PI) + 300.0 * Math.sin(lng / 30.0 * Math.PI)) * 2.0 / 3.0;
+		return ret;
+	}
+	
+function convertToDMS(decimalDegrees) {  
+    var degrees = Math.floor(decimalDegrees);  
+    var minutesFloat = (decimalDegrees - degrees) * 60;  
+    var minutes = Math.floor(minutesFloat);  
+    var secondsFloat = (minutesFloat - minutes) * 60;  
+    var seconds = secondsFloat.toFixed(4); // 保留四位小数  
+  
+    // 返回度分秒格式的字符串  
+    return degrees + '°' + pad(minutes, 2) + '′' + seconds + '″';  
+}
+	  
+	function pad(num, size) {  
+	    var s = num + "";  
+	    while (s.length < size) s = "0" + s;  
+	    return s;  
+	} 
+	
+	
+	
+</script>

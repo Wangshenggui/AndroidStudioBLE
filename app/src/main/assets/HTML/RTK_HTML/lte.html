@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<style type="text/css">
+			/* 全局样式 */
+			body,
+			html {
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+				margin: 0;
+				font-family: "微软雅黑";
+				display: flex;
+				position: absolute;
+			}
+
+			/* 菜单按钮样式 */
+			.menuButton {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				font-size: 30px;
+				cursor: pointer;
+				z-index: 9999;
+			}
+
+			/* 菜单容器样式 */
+			#menuContainer {
+				position: fixed;
+				top: 50px;
+				left: -40%;
+				width: 40%;
+				height: 100%;
+				background-color: #fff;
+				transition: left 0.3s;
+				z-index: 999;
+			}
+
+			#menuContainer ul {
+				list-style: none;
+				padding: 0;
+			}
+
+			#menuContainer li {
+				margin-bottom: 10px;
+			}
+
+			#menuContainer a {
+				text-decoration: none;
+				color: #333;
+				font-size: 18px;
+				margin-left: 10px;
+			}
+
+			#menuContainer li+li::before {
+				content: '';
+				display: block;
+				border-top: 1px solid #ccc;
+				margin: 10px 0;
+			}
+
+			.til {
+				position: absolute;
+				left: 30%;
+				top: 0%;
+			}
+
+			#base {
+				position: absolute;
+				left: 6%;
+				top: 9%;
+			}
+
+			/* 矩形框样式 */
+			.rectangle-container {
+				display: flex;
+				justify-content: space-around;
+				width: 100%;
+				margin-top: 20px;
+			}
+
+			.rectangle {
+				width: 100px;
+				height: 50px;
+				background-color: #ccc;
+				cursor: pointer;
+				text-align: center;
+				line-height: 50px;
+			}
+
+			#rectangle1 {
+				position: absolute;
+				left: 20%;
+				top: 10%;
+			}
+
+			#rectangle2 {
+				position: absolute;
+				left: 53%;
+				top: 10%;
+			}
+
+			.port {
+				width: 100px;
+				height: 50px;
+				background-color: #ccc;
+				cursor: pointer;
+				text-align: center;
+				line-height: 50px;
+			}
+
+			#port1 {
+				position: absolute;
+				left: 20%;
+				top: 20%;
+			}
+
+			#port2 {
+				position: absolute;
+				left: 53%;
+				top: 20%;
+			}
+
+			#portx {
+				position: absolute;
+				left: 6%;
+				top: 19%;
+			}
+
+			#mount {
+				position: absolute;
+				left: 6%;
+				top: 28%;
+
+			}
+
+			#mountDropdown {
+				position: absolute;
+				left: 24%;
+				top: 28%;
+				height: 50px;
+				width: 215px;
+
+				font-size: 24px;
+				/* 增大字体大小 */
+				background-color: #ccc;
+				cursor: pointer;
+				text-align: center;
+				line-height: 50px;
+			}
+
+			#account {
+
+				position: absolute;
+				left: 8%;
+				top: 37%;
+
+			}
+
+			#password {
+
+				position: absolute;
+				left: 8%;
+				top: 46%;
+
+			}
+
+
+
+			/* 账号输入框样式 */
+			#accountInput {
+				position: absolute;
+				left: 20%;
+				top: 37%;
+				width: 220px;
+				height: 50px;
+				font-size: 24px;
+				border: 1px solid #ccc;
+				padding: 5px;
+				text-align: center;
+			}
+
+			/* 密码输入框样式 */
+			#passwordInput {
+				position: absolute;
+				left: 20%;
+				top: 46%;
+				width: 220px;
+				height: 50px;
+				font-size: 24px;
+				border: 1px solid #ccc;
+				padding: 5px;
+				text-align: center;
+			}
+
+
+
+
+
+			#sendButton {
+				font-size: 24px;
+				padding: 20px 45px;
+				background-color: #0055ff;
+				position: absolute;
+				left: 34%;
+				top: 60%;
+			}
+
+
+
+
+
+
+
+			.selected {
+				background-color: #5500ff;
+			}
+		</style>
+
+		<title>4G模块配置</title>
+	</head>
+	<body>
+		<!-- 菜单按钮 -->
+		<div id="menuButton" class="menuButton">&#9776;</div>
+		<!-- 菜单容器 -->
+		<div id="menuContainer"></div>
+		<h1 class="til">差分账号配置</h1>
+
+		<h3 class="h3" id="base">基站</h3>
+		<div id="rectangle1" class="rectangle">移动</div>
+		<div id="rectangle2" class="rectangle">千寻</div>
+
+		<h3 class="h3" id="portx">端口</h3>
+		<div id="port1" class="port">8001</div>
+		<div id="port2" class="port">8002</div>
+
+		<h3 class="h3" id="mount">挂载点</h3>
+		<select id="mountDropdown" onchange="updateC()">
+			<option value="">请先选择基站</option>
+		</select>
+
+		<h3 class="h3" id="account">账号</h3>
+		<input type="text" id="accountInput" placeholder="请输入差分账号">
+
+		<h3 class="h3" id="password">密码</h3>
+		<input type="password" id="passwordInput" placeholder="请输入密码">
+
+
+
+
+		<button onclick="sendData()" id="sendButton">发送</button>
+
+
+	</body>
+</html>
+
+
+
+
+<script type="text/javascript">
+	var ws = null;
+	// 连接到WebSocket服务器
+	function connectToServer() {
+		ws = new WebSocket("ws://8.137.81.229:8880");
+
+		// WebSocket连接成功事件
+		ws.onopen = function() {
+			console.log("WebSocket连接已建立.");
+		};
+
+		// WebSocket收到消息事件
+		ws.onmessage = function(event) {
+			var data = JSON.parse(event.data);
+		};
+		// WebSocket连接关闭事件
+		ws.onclose = function() {
+			console.log("WebSocket连接已关闭.");
+		};
+	}
+	// 页面加载时自动连接WebSocket服务器
+	connectToServer();
+	document.addEventListener('DOMContentLoaded', function() {
+		var menuButton = document.getElementById('menuButton');
+		var menuContainer = document.getElementById('menuContainer');
+		var isMenuVisible = false; // 记录菜单的显示状态，默认为隐藏
+
+		// 添加菜单链接
+		var menuContent = '<ul>' +
+			'<li><a href="index.html">首页</a></li>' +
+			'<li><a href="motor.html">电机控制</a></li>' +
+			'<li><a href="lte.html">配置4G模块</a></li>' +
+			'<li><a href="rtk.html">配置RTK模块</a></li>'+
+			'<li><a href="map.html">地图打点</a></li>' +
+			'</ul>';
+		menuContainer.innerHTML = menuContent;
+
+		// 菜单按钮点击事件处理函数
+		menuButton.addEventListener('click', function() {
+			isMenuVisible = !isMenuVisible; // 反转菜单的显示状态
+			menuContainer.style.left = isMenuVisible ? '0' : '-40%';
+		});
+
+		// 单击其他地方菜单缩回
+		document.addEventListener('click', function(event) {
+			if (event.target !== menuButton && !menuContainer.contains(event.target)) {
+				isMenuVisible = false; // 隐藏菜单
+				menuContainer.style.left = '-40%';
+			}
+		});
+	});
+
+	var a = 1;
+	var b = 4;
+	var c = 9;
+
+	// 基站选择
+	document.getElementById('rectangle1').addEventListener('click', function() {
+		// 更新a的值为1
+		a = 1;
+		// 移除矩形框的选中状态
+		document.getElementById('rectangle1').classList.add('selected');
+		document.getElementById('rectangle2').classList.remove('selected');
+		console.log('a:' + a);
+		updateMountOptions();
+	});
+
+	// 矩形框2点击事件处理函数
+	document.getElementById('rectangle2').addEventListener('click', function() {
+		// 更新a的值为2
+		a = 2;
+		// 移除矩形框的选中状态
+		document.getElementById('rectangle2').classList.add('selected');
+		document.getElementById('rectangle1').classList.remove('selected');
+		console.log('a:' + a);
+		updateMountOptions();
+	});
+
+	// 端口选择
+	document.getElementById('port1').addEventListener('click', function() {
+		// 更新b的值为3
+		b = 3;
+		// 移除矩形框的选中状态
+		document.getElementById('port1').classList.add('selected');
+		document.getElementById('port2').classList.remove('selected');
+		console.log('b:' + b);
+	});
+
+	document.getElementById('port2').addEventListener('click', function() {
+		// 更新b的值为4
+		b = 4;
+		// 移除矩形框的选中状态
+		document.getElementById('port2').classList.add('selected');
+		document.getElementById('port1').classList.remove('selected');
+		console.log('b:' + b);
+	});
+
+	// 更新挂载点选项
+	function updateMountOptions() {
+		var mountDropdown = document.getElementById('mountDropdown');
+		mountDropdown.innerHTML = ''; // 清空现有选项
+
+		var options = [];
+		if (a === 1) {
+			options = [{
+					text: 'RTCM33_GRCEpro',
+					value: '9'
+				},
+				{
+					text: 'RTCM33_GRCEJ',
+					value: '5'
+				},
+				{
+					text: 'RTCM33_GRCE',
+					value: '6'
+				},
+				{
+					text: 'RTCM33_GRC',
+					value: '7'
+				},
+				{
+					text: 'RTCM30_GR',
+					value: '8'
+				}
+			];
+		} else if (a === 2) {
+			options = [{
+					text: 'RTCM32_GGB',
+					value: '10'
+				},
+				{
+					text: 'RTCM30_GG',
+					value: '11'
+				}
+			];
+		}
+
+		options.forEach(function(option) {
+			var opt = document.createElement('option');
+			opt.value = option.value;
+			opt.innerHTML = option.text;
+			mountDropdown.appendChild(opt);
+		});
+	}
+
+	// 更新变量c的值
+	function updateC() {
+		var mountDropdown = document.getElementById('mountDropdown');
+		c = mountDropdown.value; // 获取选中的挂载点选项值
+		console.log('c:' + c);
+	}
+	// 发送数据到WebSocket服务器
+	function sendData() {
+		d = document.getElementById("accountInput").value; // 获取账号输入框的值
+		f = document.getElementById("passwordInput").value; // 获取密码输入框的值
+
+		var lte = {
+			lte: '$CORS,' + a + ',' + b + ',' + c + ',' + d + ',' + f
+		};
+
+		// 将JSON字符串发送到WebSocket服务器
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			ws.send(JSON.stringify(lte));
+			console.log("已发送数据：" + JSON.stringify(lte));
+		} else {
+			console.log("WebSocket连接不可用.");
+		}
+	}
+	// 函数：从存储加载上次输入的值
+    function loadLastInput() {
+        var lastAccount = localStorage.getItem('lastAccount');
+        var lastPassword = localStorage.getItem('lastPassword');
+
+        if (lastAccount) {
+            document.getElementById('accountInput').value = lastAccount;
+        }
+
+        if (lastPassword) {
+            document.getElementById('passwordInput').value = lastPassword;
+        }
+    }
+
+    // 函数：将输入值保存到存储中
+    function saveInput() {
+        var accountInput = document.getElementById('accountInput').value;
+        var passwordInput = document.getElementById('passwordInput').value;
+
+        localStorage.setItem('lastAccount', accountInput);
+        localStorage.setItem('lastPassword', passwordInput);
+    }
+
+    // 当文档加载时调用 loadLastInput 函数
+    document.addEventListener('DOMContentLoaded', function() {
+        loadLastInput();
+    });
+
+    // 为输入框附加事件监听器以在更改时保存输入值
+    document.getElementById('accountInput').addEventListener('input', saveInput);
+    document.getElementById('passwordInput').addEventListener('input', saveInput);
+</script>

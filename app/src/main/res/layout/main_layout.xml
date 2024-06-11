@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    tools:context=".MainActivity">
+
+
+    <Button
+        android:id="@+id/goBluetoothButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="配置蓝牙"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.875" />
+
+    <Button
+        android:id="@+id/TxButt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="发送数据"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.976" />
+
+    <TextView
+        android:id="@+id/ReceiveTextView"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:text="0xAB   0x10   0x13   0x1D   0x41   0x2B   0x87   0x16   0xD9   0xCE   0xF7   0xB3   0x3F   0x00   0x00   0x00   0xE0   0xE9   0xCF   0x70   0x40   0x18   0x06   0x05   0x44   0x47   0x65   0xF5   0x54   0x3D   0xC6   0xC4   0x40   0x84   0xB8   0xB4   0x12   0x13   0x7E   0xA4   0x40   0x00   0x00   0x00   0x00   0x00   0x80   0x87   0xC3   0x40   0x30   0x4C   0xA6   0x0A   0x06   0x93   0x93   0x40   0x01   0xC3   0x00   0x00   0x00   0x00   0x00   0x00   0x00   0x00   0x00   0x00   0x00   0x00   0x00   0x00   0x00   0x00   0xEB   0x90"/>
+
+    <TextView
+        android:id="@+id/TimeViewText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="时间"
+        android:textSize="22dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ReceiveTextView"
+        app:layout_constraintVertical_bias="0.277"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <TextView
+        android:id="@+id/LongitudeViewText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="经度"
+        android:textSize="22dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ReceiveTextView"
+        app:layout_constraintVertical_bias="0.323"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <TextView
+        android:id="@+id/LatitudeViewText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="纬度"
+        android:textSize="22dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ReceiveTextView"
+        app:layout_constraintVertical_bias="0.369"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <TextView
+        android:id="@+id/CourseAngleViewText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="航向角"
+        android:textSize="22dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ReceiveTextView"
+        app:layout_constraintVertical_bias="0.414"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <TextView
+        android:id="@+id/SpeedViewText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="速度"
+        android:textSize="22dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ReceiveTextView"
+        app:layout_constraintVertical_bias="0.46"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <TextView
+        android:id="@+id/Pin_TranslateViewText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="定位状态"
+        android:textSize="22dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ReceiveTextView"
+        app:layout_constraintVertical_bias="0.506"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <TextView
+        android:id="@+id/PositioningModeViewText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="定位模式"
+        android:textSize="22dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ReceiveTextView"
+        app:layout_constraintVertical_bias="0.552"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <TextView
+        android:id="@+id/HCSDSViewText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="卫星数量"
+        android:textSize="22dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ReceiveTextView"
+        app:layout_constraintVertical_bias="0.596"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <TextView
+        android:id="@+id/HDOPViewText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="水平精度因子"
+        android:textSize="22dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ReceiveTextView"
+        app:layout_constraintVertical_bias="0.642"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <TextView
+        android:id="@+id/AltitudeViewText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="海拔高度"
+        android:textSize="22dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ReceiveTextView"
+        app:layout_constraintVertical_bias="0.688"
+        tools:layout_editor_absoluteX="0dp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

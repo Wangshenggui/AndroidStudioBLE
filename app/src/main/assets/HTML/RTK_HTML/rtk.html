@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<style type="text/css">
+			/* 全局样式 */
+			body,
+			html {
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+				margin: 0;
+				font-family: "微软雅黑";
+				display: flex;
+				position: absolute;
+			}
+
+			/* 菜单按钮样式 */
+			.menuButton {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				font-size: 30px;
+				cursor: pointer;
+				z-index: 9999;
+			}
+
+			/* 菜单容器样式 */
+			#menuContainer {
+				position: fixed;
+				top: 50px;
+				left: -40%;
+				width: 40%;
+				height: 100%;
+				background-color: #fff;
+				transition: left 0.3s;
+				z-index: 999;
+			}
+
+			#menuContainer ul {
+				list-style: none;
+				padding: 0;
+			}
+
+			#menuContainer li {
+				margin-bottom: 10px;
+			}
+
+			#menuContainer a {
+				text-decoration: none;
+				color: #333;
+				font-size: 18px;
+				margin-left: 10px;
+			}
+
+			#menuContainer li+li::before {
+				content: '';
+				display: block;
+				border-top: 1px solid #ccc;
+				margin: 10px 0;
+			}
+
+			.til {
+				position: absolute;
+				left: 30%;
+				top: 0%;
+			}
+
+			#com {
+				position: absolute;
+				left: 6%;
+				top: 9%;
+			}
+
+			/* 矩形框样式 */
+			.rectangle-container {
+				display: flex;
+				justify-content: space-around;
+				width: 100%;
+				margin-top: 20px;
+			}
+
+			.rectangle {
+				width: 100px;
+				height: 50px;
+				background-color: #ccc;
+				cursor: pointer;
+				text-align: center;
+				line-height: 50px;
+			}
+
+			#rectangle1 {
+				position: absolute;
+				left: 26%;
+				top: 10%;
+			}
+
+			#rectangle2 {
+				position: absolute;
+				left: 58%;
+				top: 10%;
+			}
+
+			.data {
+				width: 80px;
+				height: 50px;
+				background-color: #ccc;
+				cursor: pointer;
+				text-align: center;
+				line-height: 50px;
+			}
+
+			#gga {
+				position: absolute;
+				left: 22%;
+				top: 20%;
+			}
+
+			#rmc {
+				position: absolute;
+				left: 47%;
+				top: 20%;
+			}
+
+			#gsv {
+				position: absolute;
+				left: 72%;
+				top: 20%;
+			}
+
+
+
+
+			#datax {
+				position: absolute;
+				left: 1.8%;
+				top: 19%;
+			}
+
+
+			#frequencyx {
+				position: absolute;
+				left: 1.8%;
+				top: 28%;
+			}
+
+
+
+			.range-switch {
+				/* position: relative; */
+				/* display: inline-block; */
+				width: 300px;
+				height: 100px;
+				position: absolute;
+				left: 26%;
+				top: 29%;
+
+			}
+
+			.range-switch input {
+				width: 200px;
+				-webkit-appearance: none;
+				appearance: none;
+				height: 38px;
+				background: #999999;
+				outline: none;
+				opacity: 0.7;
+				transition: opacity .2s;
+			}
+
+			.range-switch input:hover {
+				opacity: 1;
+			}
+
+			.range-switch input::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 50px;
+				height: 60px;
+				background: #0055ff;
+
+				cursor: pointer;
+
+			}
+
+			.range-switch input::-moz-range-thumb {
+				width: 40px;
+				height: 40px;
+				background: #0055ff;
+				cursor: pointer;
+				border-radius: 50%;
+			}
+
+			p {
+				font-size: 20px;
+				margin: 20px;
+				position: absolute;
+				left: 65%;
+				bottom: 40%;
+				color: #ff0000;
+
+			}
+
+			#satellitex {
+				position: absolute;
+				left: 1.8%;
+				top: 37%;
+			}
+
+			.satellite {
+				width: 100px;
+				height: 50px;
+				background-color: #ccc;
+				cursor: pointer;
+				text-align: center;
+				line-height: 50px;
+			}
+
+			#onsatellite {
+				position: absolute;
+				left: 26%;
+				top: 38%;
+			}
+
+			#offsatellite {
+				position: absolute;
+				left: 58%;
+				top: 38%;
+			}
+
+
+
+
+
+			#antx {
+				position: absolute;
+
+				top: 46%;
+			}
+
+			.ant {
+				width: 100px;
+				height: 50px;
+				background-color: #ccc;
+				cursor: pointer;
+				text-align: center;
+				line-height: 50px;
+			}
+
+			#onant {
+				position: absolute;
+				left: 26%;
+				top: 47%;
+			}
+
+			#offant {
+				position: absolute;
+				left: 58%;
+				top: 47%;
+			}
+
+
+
+
+
+			#sendButton {
+				font-size: 24px;
+				padding: 20px 45px;
+				background-color: #00aa00;
+				position: absolute;
+				left: 34%;
+				top: 56%;
+			}
+
+			#resetButton {
+			width: 100px;
+			height: 50px;
+			background-color: #ff0000;
+			cursor: pointer;
+			text-align: center;
+			line-height: 50px;
+				position: absolute;
+				left: 4%;
+				top: 70%;
+			}
+
+			#offButton1 {
+			width: 100px;
+			height: 50px;
+			background-color: #ff0000;
+			cursor: pointer;
+			text-align: center;
+			line-height: 50px;
+				position: absolute;
+				left: 38%;
+				top: 70%;
+			}
+
+			#offButton2 {
+			width: 100px;
+			height: 50px;
+			background-color: #ff0000;
+			cursor: pointer;
+			text-align: center;
+			line-height: 50px;
+				position: absolute;
+				left: 72%;
+				top: 70%;
+			}
+			.selected {
+				background-color: #00aaff;
+			}
+		</style>
+
+		<title>RTK模块配置</title>
+	</head>
+	<body>
+		<!-- 菜单按钮 -->
+		<div id="menuButton" class="menuButton">&#9776;</div>
+		<!-- 菜单容器 -->
+		<div id="menuContainer"></div>
+		<h1 class="til">RTK模块配置</h1>
+
+		<h3 class="h3" id="com">串口</h3>
+		<div id="rectangle1" class="rectangle">串口1</div>
+		<div id="rectangle2" class="rectangle">串口2</div>
+
+		<h3 class="h3" id="datax">数据输出</h3>
+		<div id="gga" class="data">GNGGA</div>
+		<div id="rmc" class="data">GNRMC</div>
+		<div id="gsv" class="data">GNTHS</div>
+
+		<h3 class="h3" id="frequencyx">输出频率</h3>
+		<div class="range-switch">
+			<input type="range" min="0" max="20" value="0" id="frequencySlider">
+			<p><span id="frequencyValue">0Hz</span></p>
+		</div>
+
+		<h3 class="h3" id="satellitex">卫星启用</h3>
+		<div id="onsatellite" class="satellite">启用所有卫星</div>
+		<div id="offsatellite" class="satellite">禁用所有卫星</div>
+
+		<h3 class="h3" id="antx">从天线启用</h3>
+		<div id="onant" class="ant">启用从天线</div>
+		<div id="offant" class="ant">禁用从天线</div>
+
+
+		<button onclick="sendData()" id="sendButton">发送</button>
+
+		<button onclick="sendreset()" id="resetButton">恢复出厂设置</button>
+		<button onclick="offcom1()" id="offButton1">禁用串口1</button>
+		<button onclick="offcom2()" id="offButton2">禁用串口2</button>
+
+
+
+	</body>
+</html>
+
+
+
+
+<script type="text/javascript">
+	var ws = null;
+	// 连接到WebSocket服务器
+	function connectToServer() {
+		ws = new WebSocket("ws://8.137.81.229:8880");
+
+		// WebSocket连接成功事件
+		ws.onopen = function() {
+			console.log("WebSocket连接已建立.");
+		};
+
+		// WebSocket收到消息事件
+		ws.onmessage = function(event) {
+			var data = JSON.parse(event.data);
+		};
+		// WebSocket连接关闭事件
+		ws.onclose = function() {
+			console.log("WebSocket连接已关闭.");
+		};
+	}
+	// 页面加载时自动连接WebSocket服务器
+	connectToServer();
+	document.addEventListener('DOMContentLoaded', function() {
+		var menuButton = document.getElementById('menuButton');
+		var menuContainer = document.getElementById('menuContainer');
+		var isMenuVisible = false; // 记录菜单的显示状态，默认为隐藏
+
+		// 添加菜单链接
+		var menuContent = '<ul>' +
+			'<li><a href="index.html">首页</a></li>' +
+			'<li><a href="motor.html">电机控制</a></li>' +
+			'<li><a href="lte.html">配置4G模块</a></li>' +
+			'<li><a href="rtk.html">配置RTK模块</a></li>' +
+			'<li><a href="map.html">地图打点</a></li>' +
+			'</ul>';
+		menuContainer.innerHTML = menuContent;
+
+		// 菜单按钮点击事件处理函数
+		menuButton.addEventListener('click', function() {
+			isMenuVisible = !isMenuVisible; // 反转菜单的显示状态
+			menuContainer.style.left = isMenuVisible ? '0' : '-40%';
+		});
+
+		// 单击其他地方菜单缩回
+		document.addEventListener('click', function(event) {
+			if (event.target !== menuButton && !menuContainer.contains(event.target)) {
+				isMenuVisible = false; // 隐藏菜单
+				menuContainer.style.left = '-40%';
+			}
+		});
+	});
+
+
+	// 初始化变量
+	let a = 3;
+	let b = 1;
+	let c = 1;
+	let d = 0;
+	let e = 10;
+	let f = 1;
+	let g = 1;
+
+
+	let isRectangle1Selected = false;
+	let isRectangle2Selected = false;
+
+	// 更新a的值的函数
+	function updateAValue() {
+		if (isRectangle1Selected && isRectangle2Selected) {
+			a = 3;
+		} else if (isRectangle1Selected) {
+			a = 1;
+		} else if (isRectangle2Selected) {
+			a = 2;
+		} else {
+			a = 9;
+		}
+		console.log('a:' + a);
+	}
+
+	document.getElementById('rectangle1').addEventListener('click', function() {
+		isRectangle1Selected = !isRectangle1Selected; // 切换选择状态
+		document.getElementById('rectangle1').classList.toggle('selected', isRectangle1Selected); // 更新样式
+		updateAValue();
+	});
+
+	document.getElementById('rectangle2').addEventListener('click', function() {
+		isRectangle2Selected = !isRectangle2Selected; // 切换选择状态
+		document.getElementById('rectangle2').classList.toggle('selected', isRectangle2Selected); // 更新样式
+		updateAValue();
+	});
+
+
+	function updateBValues() {
+		b = document.getElementById('gga').classList.contains('selected') ? 1 : 0;
+		c = document.getElementById('rmc').classList.contains('selected') ? 1 : 0;
+		d = document.getElementById('gsv').classList.contains('selected') ? 1 : 0;
+
+		// 打印结果
+		console.log('b:' + b, 'c:' + c, 'd:' + d);
+	}
+
+	// 每个元素的点击事件处理函数
+	document.getElementById('gga').addEventListener('click', function() {
+		this.classList.toggle('selected'); // 切换选中状态
+		updateBValues();
+	});
+
+	document.getElementById('rmc').addEventListener('click', function() {
+		this.classList.toggle('selected'); // 切换选中状态
+		updateBValues();
+	});
+
+	document.getElementById('gsv').addEventListener('click', function() {
+		this.classList.toggle('selected'); // 切换选中状态
+		updateBValues();
+	});
+
+	document.getElementById('frequencySlider').addEventListener('input', function() {
+		var value = parseInt(this.value);
+		e = value;
+		console.log(`e: ${e}`);
+	});
+
+	document.addEventListener("DOMContentLoaded", function() {
+		const frequencySlider = document.getElementById('frequencySlider');
+		const frequencyValue = document.getElementById('frequencyValue');
+
+		// 初始化显示的值
+		frequencyValue.textContent = frequencySlider.value;
+
+		// 更新显示的值
+		frequencySlider.addEventListener('input', function() {
+			frequencyValue.textContent = frequencySlider.value + 'Hz';
+		});
+	});
+
+	document.getElementById('onsatellite').addEventListener('click', function() {
+		f = 1;
+		document.getElementById('onsatellite').classList.add('selected');
+		document.getElementById('offsatellite').classList.remove('selected');
+		console.log('f:' + f);
+	});
+	document.getElementById('offsatellite').addEventListener('click', function() {
+		f = 0;
+		document.getElementById('offsatellite').classList.add('selected');
+		document.getElementById('onsatellite').classList.remove('selected');
+		console.log('f:' + f);
+	});
+
+	document.getElementById('onant').addEventListener('click', function() {
+		g = 1;
+		document.getElementById('onant').classList.add('selected');
+		document.getElementById('offant').classList.remove('selected');
+		console.log('g:' + g);
+	});
+	document.getElementById('offant').addEventListener('click', function() {
+		g = 0;
+		document.getElementById('offant').classList.add('selected');
+		document.getElementById('onant').classList.remove('selected');
+		console.log('g:' + g);
+	});
+
+
+
+	// 发送数据到WebSocket服务器
+	function sendData() {
+
+		var rtk = {
+			rtk: a + ',' + b + ',' + c + ',' + d + ',' + e + ',' + f + ',' + g
+		};
+
+		// 将JSON字符串发送到WebSocket服务器
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			ws.send(JSON.stringify(rtk));
+			console.log("已发送数据：" + JSON.stringify(rtk));
+		} else {
+			console.log("WebSocket连接不可用.");
+		}
+	}
+	
+	function sendreset() {
+	
+		var rtk = {
+			rtk: '0,1,0,0,10,1,1'
+		};
+	
+		// 将JSON字符串发送到WebSocket服务器
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			ws.send(JSON.stringify(rtk));
+			console.log("已发送数据：" + JSON.stringify(rtk));
+		} else {
+			console.log("WebSocket连接不可用.");
+		}
+	}
+	
+	
+	function offcom1() {
+	
+		var rtk = {
+			rtk: '4,1,0,0,10,1,1'
+		};
+	
+		// 将JSON字符串发送到WebSocket服务器
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			ws.send(JSON.stringify(rtk));
+			console.log("已发送数据：" + JSON.stringify(rtk));
+		} else {
+			console.log("WebSocket连接不可用.");
+		}
+	}
+	
+	
+	function offcom2() {
+	
+		var rtk = {
+			rtk: '5,1,0,0,10,1,1'
+		};
+	
+		// 将JSON字符串发送到WebSocket服务器
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			ws.send(JSON.stringify(rtk));
+			console.log("已发送数据：" + JSON.stringify(rtk));
+		} else {
+			console.log("WebSocket连接不可用.");
+		}
+	}
+	
+	
+	
+	
+</script>

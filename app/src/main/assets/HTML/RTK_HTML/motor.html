@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport"
+			  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, orientation=landscape">
+		<style type="text/css">
+			body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            font-family: "微软雅黑", sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+			/* 控制区容器样式 */
+			#ctrlContainer {
+				width: 100%;
+				height: 30%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				margin-top: 0px;
+			}
+
+			#sendButton {
+
+				font-size: 24px;
+				/* 增大字体大小 */
+				padding: 1% 40px;
+				background-color: #0055ff;
+
+				position: absolute;
+				left: 34%;
+				top: 90%;
+
+
+			}
+
+			/* 控制区容器中按钮样式 */
+			#selectAllButton {
+				font-size: 20px;
+				padding: 15px 30px;
+				/* 增大按钮尺寸 */
+				/* margin: 0 auto 0 10px; */
+				/* 水平居中 */
+				position: absolute;
+				left: 35%;
+				top: 58%;
+			}
+
+			/* 信息容器样式 */
+			#infoContainer {
+				width: 100%;
+				height: 70%;
+				margin-top: 10%;
+				overflow-y: auto;
+				background-color: rgba(255, 255, 255, 0.9);
+				padding: 0px;
+				box-shadow: 0 0px 0px rgba(0, 0, 0, 0.1);
+			}
+
+			/* 状态栏样式 */
+			#statusBar {
+				margin-bottom: 5%;
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-between;
+
+			}
+
+			#statusBar span {
+				width: 50%;
+				margin-bottom: 0px;
+				margin-top: 2px;
+
+			}
+
+			#dateTimeInfo {
+				white-space: nowrap;
+			}
+
+			/* 电机信息容器样式 */
+			#motorContainer {
+				height: 40%;
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-around;
+			}
+
+			.motorRow {
+				width: 100%;
+				display: flex;
+				justify-content: space-around;
+				margin-bottom: 10%;
+			}
+
+			#motor1,
+			#motor2,
+			#motor3,
+			#motor4 {
+				margin-top: -8px;
+			}
+
+			.motorBox {
+				width: 42%;
+				height: 100%;
+				border: 1px solid gray;
+				border-radius: 15px;
+				left: 0px;
+				display: flex;
+				flex-direction: column;
+				justify-content: flex-start;
+				align-items: center;
+				font-size: 16px;
+				padding: 10px;
+				position: relative;
+				background-color: #aa9386;
+			}
+
+			.motorBox span.box {
+				font-size: 24px;
+				margin-bottom: 5px;
+			}
+
+			.motorBox span {
+				margin-bottom: 2px;
+			}
+
+			.statusDot {
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				position: absolute;
+				bottom: 10px;
+				right: 12px;
+				left: 48px;
+			}
+
+			.statusText {
+				position: absolute;
+				bottom: 6px;
+				left: 80px;
+				color: black;
+			}
+
+
+
+			/* 菜单按钮样式 */
+			.menuButton {
+				position: absolute;
+				top: 1%;
+				left: 2%;
+				font-size: 30px;
+				cursor: pointer;
+				z-index: 9999;
+			}
+
+			/* 菜单容器样式 */
+			#menuContainer {
+				position: fixed;
+				top: 50px;
+				left: -40%;
+				width: 40%;
+				height: 100%;
+				background-color: #fff;
+				transition: left 0.3s;
+				z-index: 999;
+			}
+
+			#menuContainer ul {
+				list-style: none;
+				padding: 0;
+			}
+
+			#menuContainer li {
+				margin-bottom: 10px;
+			}
+
+			#menuContainer a {
+				text-decoration: none;
+				color: #333;
+				font-size: 18px;
+				margin-left: 10px;
+			}
+
+			#menuContainer li+li::before {
+				content: '';
+				display: block;
+				border-top: 1px solid #ccc;
+				margin: 10px 0;
+			}
+
+			/* 添加已选择电机的样式 */
+			.motorBox.selected {
+				border: 4px solid blue;
+			}
+
+			.switch {
+				position: relative;
+				display: inline-block;
+				width: 200px;
+				/* 宽度 */
+				height: 50px;
+				/* 高度 */
+				/* 	margin: 20px; */
+				/* 外边距 */
+				position: absolute;
+				left: 4%;
+				top: 68%;
+			}
+
+			.switch input {
+				opacity: 0;
+				width: 0;
+				height: 0;
+			}
+
+			.slider {
+				position: absolute;
+				cursor: pointer;
+				top: 0;
+				left: 0px;
+				right: 0;
+				bottom: 0;
+				background-color: #D4B9B0;
+				-webkit-transition: .4s;
+				transition: .4s;
+
+				width: 160px;
+			}
+
+			.slider:before {
+				position: absolute;
+				content: "";
+				height: 65px;
+				/* 滑块高度 */
+				width: 100px;
+				/* 滑块宽度 */
+				left: 0px;
+				/* 滑块左边距 */
+				bottom: -10px;
+				/* 滑块底部边距 */
+				background-color: #4D4D4D;
+				-webkit-transition: .4s;
+				transition: .4s;
+
+			}
+
+			input:checked+.slider {
+				background-color: #D4B9B0;
+			}
+
+			input:focus+.slider {
+				box-shadow: 0 0 1px #D4B9B0;
+			}
+
+			input:checked+.slider:before {
+				-webkit-transform: translateX(80px);
+				/* 滑块向右滑动距离 (包括偏移量) */
+				-ms-transform: translateX(80px);
+				transform: translateX(80px);
+			}
+
+
+			/* 文本标签 */
+			.switch span {
+				position: absolute;
+				top: 50%;
+				transform: translateY(-50%);
+				font-size: 20px;
+				color: #333;
+
+			}
+
+			.switch .on {
+				left: 30px;
+				/* "正转"文本左边距 */
+				color: #ffffff;
+			}
+
+
+			.switch .off {
+				right: 50px;
+				/* "反转"文本右边距 */
+				color: #ffffff;
+				/* 文本颜色较浅 */
+			}
+
+			/* 禁用状态 */
+			.switch.disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+
+			/* 禁用状态的滑块 */
+			.switch.disabled .slider {
+				cursor: not-allowed;
+			}
+
+			/* 禁用状态的文本 */
+			.switch.disabled span {
+				color: #ccc;
+			}
+
+			/* 新增的6档滑块样式 */
+			.range-switch {
+				/* position: relative; */
+				/* display: inline-block; */
+				width: 80%;
+				height: 100px;
+				position: absolute;
+				left: 10%;
+				top: 80%;
+			}
+
+			.range-switch input {
+				width: 100%;
+				-webkit-appearance: none;
+				appearance: none;
+				height: 50px;
+				background: #c29b8e;
+				outline: none;
+				
+				transition: opacity .2s;
+			}
+
+			.range-switch input:hover {
+				opacity: 1;
+			}
+
+			.range-switch input::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 50px;
+				height: 65px;
+				background: #000000;
+				cursor: pointer;
+
+			}
+
+			.range-switch input::-moz-range-thumb {
+				width: 40px;
+				height: 40px;
+				background: #0055ff;
+				cursor: pointer;
+				border-radius: 50%;
+			}
+			        p {
+			            font-size: 20px;
+			            margin: 20px;
+						position: absolute;
+						left: 10%;
+						bottom: 80%;
+						color: #ff0000;
+						
+						z-index: -1;
+			        }
+		</style>
+		<title>电机控制</title>
+	</head>
+	<body>
+		<!-- 菜单按钮 -->
+		<div id="menuButton" class="menuButton">&#9776;</div>
+		<!-- 菜单容器 -->
+		<div id="menuContainer"></div>
+		<!-- 信息容器 -->
+		<div id="infoContainer">
+			<!-- 状态栏 -->
+			<div id="statusBar">
+				<span id="speedInfo">速度: 0</span>
+				<span id="altitudeInfo">海拔高度: 0 米</span>
+				<span id="rtkStateInfo">RTK状态: 0</span>
+				<span id="rtkNumInfo">卫星数量: 0</span>
+				<span id="lngInfo">经度: 0</span>
+				<span id="latInfo">纬度: 0</span>
+				<span id="dateTimeInfo">日期时间: </span>
+			</div>
+			<!-- 电机信息容器样式 -->
+			<div id="motorContainer">
+				<div class="motorRow">
+					<div class="motorBox" id="motor1" onclick="selectMotor(1)">
+						<span class="box">1号仓</span>
+						<span class="gear"></span>
+						<span id="motor1Speed1">皮带电机: 0</span>
+						<span id="motor1Speed2">干扰电机: 0</span>
+						<div class="statusDot" id="statusDot1"></div>
+						<span class="statusText" id="statusText1"></span>
+					</div>
+					<!-- 添加点击事件属性以进行选择 -->
+					<div class="motorBox" id="motor2" onclick="selectMotor(2)">
+						<span class="box">2号仓</span>
+						<span id="motor2Speed1">皮带电机: 0</span>
+						<span id="motor2Speed2">干扰电机: 0</span>
+						<div class="statusDot" id="statusDot2"></div>
+						<span class="statusText" id="statusText2"></span>
+					</div>
+				</div>
+				<div class="motorRow">
+					<!-- 添加点击事件属性以进行选择 -->
+					<div class="motorBox" id="motor3" onclick="selectMotor(3)">
+						<span class="box">3号仓</span>
+						<span id="motor3Speed1">皮带电机: 0</span>
+						<span id="motor3Speed2">干扰电机: 0</span>
+						<div class="statusDot" id="statusDot3"></div>
+						<span class="statusText" id="statusText3"></span>
+					</div>
+					<!-- 添加点击事件属性以进行选择 -->
+					<div class="motorBox" id="motor4" onclick="selectMotor(4)">
+						<span class="box">4号仓</span>
+						<span id="motor4Speed1">皮带电机: 0</span>
+						<span id="motor4Speed2">干扰电机: 0</span>
+						<div class="statusDot" id="statusDot4"></div>
+						<span class="statusText" id="statusText4"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 控制区容器 -->
+		<div id="ctrlContainer">
+			<!-- 添加全选按钮 -->
+			<button onclick="selectAll()" id="selectAllButton">全选</button>
+			<div class="switch">
+				<input type="checkbox" id="mySwitch">
+				<label class="slider" for="mySwitch"></label>
+				<span class="on">正转</span>
+				<span class="off">反转</span>
+			</div>
+			<div class="range-switch">
+				<input type="range" min="0" max="64" value="0" id="rangeSlider">
+	 <p>设定速度:<span id="rangeValue">0</span></p>		
+			</div>
+
+
+
+
+			<!-- 添加发送按钮 -->
+			<button onclick="sendData()" id="sendButton">发送</button>
+		</div>
+		<script type="text/javascript">
+			// 定义全局变量
+			var lastPoint = null;
+			var ws = null;
+			var speed;
+			var rtkState;
+			var rtkNum;
+			var lng;
+			var lat;
+
+			// 更新日期时间信息
+			function updateDateTime() {
+				var now = new Date();
+				var dateStr = now.toLocaleDateString();
+				var timeStr = now.toLocaleTimeString();
+				document.getElementById('dateTimeInfo').textContent = '日期时间: ' + dateStr + ' ' + timeStr;
+			}
+
+			// 初次加载时更新一次日期时间
+			updateDateTime();
+			// 设置定时器每秒更新日期时间
+			setInterval(updateDateTime, 1000);
+
+			// 连接到WebSocket服务器
+			function connectToServer() {
+				ws = new WebSocket("ws://8.137.81.229:8880");
+
+				// WebSocket连接成功事件
+				ws.onopen = function() {
+					console.log("WebSocket连接已建立.");
+				};
+
+				// WebSocket收到消息事件
+				ws.onmessage = function(event) {
+					var data = JSON.parse(event.data);
+
+					// 如果数据包含经纬度信息，更新地图信息
+					if (data.lng !== undefined && data.lat !== undefined) {
+						updateMapInfo(data);
+					}
+
+					// 如果数据包含电机信息，更新电机信息
+					if (data.S1 !== undefined) {
+						updateMotorInfo(data);
+					}
+				};
+
+				// WebSocket连接关闭事件
+				ws.onclose = function() {
+					console.log("WebSocket连接已关闭.");
+				};
+			}
+
+			// 更新地图信息
+			function updateMapInfo(data) {
+				speed = data.speed;
+				rtkState = data.rtkstate;
+				rtkNum = data.rtknum;
+				lng = data.lng;
+				lat = data.lat;
+				var altitude = data.altitude || 0;
+
+				// 更新页面显示信息
+				document.getElementById('speedInfo').textContent = '速度: ' + speed + 'km/h';
+				document.getElementById('rtkStateInfo').textContent = 'RTK状态: ' + getRTKStateText(rtkState);
+				document.getElementById('rtkNumInfo').textContent = '卫星数量: ' + rtkNum;
+				document.getElementById('lngInfo').textContent = '经度: ' + lng;
+				document.getElementById('latInfo').textContent = '纬度: ' + lat;
+				document.getElementById('altitudeInfo').textContent = '海拔高度: ' + altitude + '米';
+
+				// 提取经纬度信息
+				// var currentPoint = new BMapGL.Point(lng, lat);
+			}
+
+			// 获取RTK状态对应的文本描述
+			function getRTKStateText(rtkState) {
+				switch (rtkState) {
+					case 0:
+						return '无定位';
+					case 1:
+						return '单点定位';
+					case 2:
+						return '亚米级定位';
+					case 4:
+						return 'RTK固定解';
+					case 5:
+						return 'RTK浮动解';
+					default:
+						return '未知';
+				}
+			}
+
+			// 更新电机信息
+			function updateMotorInfo(data) {
+				document.getElementById('motor1Speed1').textContent = '皮带电机: ' + data.r1 + 'rpm';
+				document.getElementById('motor1Speed2').textContent = '干扰电机: ' + data.r5 + 'rpm';
+				document.getElementById('motor2Speed1').textContent = '皮带电机: ' + data.r2 + 'rpm';
+				document.getElementById('motor2Speed2').textContent = '干扰电机: ' + data.r6 + 'rpm';
+				document.getElementById('motor3Speed1').textContent = '皮带电机: ' + data.r3 + 'rpm';
+				document.getElementById('motor3Speed2').textContent = '干扰电机: ' + data.r7 + 'rpm';
+				document.getElementById('motor4Speed1').textContent = '皮带电机: ' + data.r4 + 'rpm';
+				document.getElementById('motor4Speed2').textContent = '干扰电机: ' + data.r8 + 'rpm';
+
+				updateStatusDot(data.S1, 'statusDot1', 'statusText1');
+				updateStatusDot(data.S2, 'statusDot2', 'statusText2');
+				updateStatusDot(data.S3, 'statusDot3', 'statusText3');
+				updateStatusDot(data.S4, 'statusDot4', 'statusText4');
+			}
+
+			// 更新状态点颜色和文字描述
+			function updateStatusDot(speed, dotId, textId) {
+				var statusDot = document.getElementById(dotId);
+				var statusText = document.getElementById(textId);
+				var color;
+
+				switch (speed) {
+					case 0:
+						color = 'gray';
+						break;
+					case 1:
+						color = 'blue';
+						break;
+					case 2:
+						color = 'green';
+						break;
+					case 3:
+						color = 'red';
+						break;
+					case 4:
+						color = 'orange';
+						break;
+				}
+
+				// 设置状态点颜色
+				statusDot.style.backgroundColor = color;
+
+				// 设置状态文字
+				statusText.textContent = getStatusText(speed);
+			}
+
+			// 获取状态文字描述
+			function getStatusText(speed) {
+				switch (speed) {
+					case 0:
+						return '离线';
+					case 1:
+						return '通电';
+					case 2:
+						return '正常';
+					case 3:
+						return '故障';
+					case 4:
+						return '缺种子';
+				}
+			}
+
+			// 页面加载时自动连接WebSocket服务器
+			connectToServer();
+
+			document.addEventListener('DOMContentLoaded', function() {
+				var menuButton = document.getElementById('menuButton');
+				var menuContainer = document.getElementById('menuContainer');
+				var isMenuVisible = false; // 记录菜单的显示状态，默认为隐藏
+
+				// 添加菜单链接
+				var menuContent = '<ul>' +
+					'<li><a href="index.html">首页</a></li>' +
+					'<li><a href="motor.html">电机控制</a></li>' +
+					'<li><a href="lte.html">配置4G模块</a></li>' +
+					'<li><a href="rtk.html">配置RTK模块</a></li>' +
+					'<li><a href="map.html">地图打点</a></li>' +
+					'</ul>';
+				menuContainer.innerHTML = menuContent;
+
+				// 菜单按钮点击事件处理函数
+				menuButton.addEventListener('click', function() {
+					isMenuVisible = !isMenuVisible; // 反转菜单的显示状态
+					menuContainer.style.left = isMenuVisible ? '0' : '-40%';
+				});
+
+				// 单击其他地方菜单缩回
+				document.addEventListener('click', function(event) {
+					if (event.target !== menuButton && !menuContainer.contains(event.target)) {
+						isMenuVisible = false; // 隐藏菜单
+						menuContainer.style.left = '-40%';
+					}
+				});
+
+				// 单击地图区域时菜单缩回
+				document.getElementById('ctrlContainer').addEventListener('click', function() {
+					isMenuVisible = false; // 隐藏菜单
+					menuContainer.style.left = '-40%';
+				});
+			});
+
+			// 选择单个电机的函数
+			function selectMotor(motorNumber) {
+				var motorBox = document.getElementById('motor' + motorNumber);
+				// 切换类以更改边框颜色
+				motorBox.classList.toggle('selected');
+			}
+
+			// 定义全局变量以跟踪全选状态
+			var isAllSelected = false;
+
+			// 定义全局变量以跟踪每个仓的选中状态
+			var n1 = 0;
+			var n2 = 0;
+			var n3 = 0;
+			var n4 = 0;
+
+			// 选择单个电机的函数
+			function selectMotor(motorNumber) {
+				var motorBox = document.getElementById('motor' + motorNumber);
+				// 切换类以更改边框颜色
+				motorBox.classList.toggle('selected');
+
+				// 根据选中状态更新相应的变量值
+				switch (motorNumber) {
+					case 1:
+						n1 = n1 === 0 ? 1 : 0;
+						break;
+					case 2:
+						n2 = n2 === 0 ? 1 : 0;
+						break;
+					case 3:
+						n3 = n3 === 0 ? 1 : 0;
+						break;
+					case 4:
+						n4 = n4 === 0 ? 1 : 0;
+						break;
+				}
+				// 打印选中状态
+				console.log("nn1:", n1);
+				console.log("nn2:", n2);
+				console.log("nn3:", n3);
+				console.log("nn4:", n4);
+			}
+
+			// 选择所有电机的函数
+			function selectAll() {
+				// 如果已经全选，则取消全选
+				if (n1 === 1 && n2 === 1 && n3 === 1 && n4 === 1) {
+					n1 = n2 = n3 = n4 = 0;
+					// 循环遍历每个电机框，并移除 'selected' 类
+					for (var i = 1; i <= 4; i++) {
+						var motorBox = document.getElementById('motor' + i);
+						motorBox.classList.remove('selected');
+					}
+				} else {
+					n1 = n2 = n3 = n4 = 1;
+					// 如果未全选，则执行全选操作
+					// 循环遍历每个电机框，并添加 'selected' 类
+					for (var i = 1; i <= 4; i++) {
+						var motorBox = document.getElementById('motor' + i);
+						motorBox.classList.add('selected');
+					}
+				}
+
+				// 打印选中状态
+				console.log("n1:", n1);
+				console.log("n2:", n2);
+				console.log("n3:", n3);
+				console.log("n4:", n4);
+			}
+			// 初始化变量
+			let z1, z2, z3, z4 = 1;
+			let s1 = 0;
+			let s2 = 0;
+			let s3 = 0;
+			let s4 = 0;
+			
+
+			// 根据开关状态更新变量的函数
+			function updateVariables(isChecked) {
+				const value = isChecked ? 0 : 1;
+				z1 = value;
+				z2 = value;
+				z3 = value;
+				z4 = value;
+				console.log(`z1: ${z1}, z2: ${z2}, z3: ${z3}, z4: ${z4}`);
+			}
+
+			// 为开关添加事件监听
+			document.getElementById('mySwitch').addEventListener('change', function() {
+				updateVariables(this.checked);
+			});
+
+			// 设置初始值
+			updateVariables(document.getElementById('mySwitch').checked);
+
+			document.getElementById('rangeSlider').addEventListener('input', function() {
+				var value = parseInt(this.value) * 1;
+				s1 = value;
+				s2 = value;
+				s3 = value;
+				s4 = value;
+				
+				// 更新显示信息（如果有）
+				console.log(`s1: ${s1}, s2: ${s2}, s3: ${s3}, s4: ${s4}`);
+			});
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const rangeSlider = document.getElementById('rangeSlider');
+            const rangeValue = document.getElementById('rangeValue');
+
+            // 初始化显示的值
+            rangeValue.textContent = rangeSlider.value;
+
+            // 更新显示的值
+            rangeSlider.addEventListener('input', function() {
+                rangeValue.textContent = rangeSlider.value+'rpm';
+            });
+        });
+		
+		
+		
+		// 发送数据的函数
+		function sendData() {
+			// 构建JSON对象
+			var data = {
+				n1: n1,
+				n2: n2,
+				n3: n3,
+				n4: n4,
+				z1: z1,
+				z2: z2,
+				z3: z3,
+				z4: z4,
+				s1: s1,
+				s2: s2,
+				s3: s3,
+				s4: s4
+			};
+		
+			// 将JSON对象转换为字符串
+			var jsonData = JSON.stringify(data);
+		
+			// 在控制台输出发送的数据
+			console.log("发送的数据：", jsonData);
+		
+			// 发送数据到WebSocket服务器
+			ws.send(jsonData);
+		}
+		</script>
+	</body>
+</html>

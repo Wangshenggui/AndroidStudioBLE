@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, orientation=landscape">
+		<style type="text/css">
+			body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            font-family: "微软雅黑", sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+			#mapContainer {
+				width: 100%;
+				height: 40vh;
+				flex-grow: 1;
+				/* 设置地图容器高度为屏幕高度的50% */
+			}
+
+			#infoContainer {
+				width: 100%;
+				height: 60vh;
+
+				/* 设置信息栏高度为屏幕高度的50% */
+				overflow-y: auto;
+				background-color: rgba(255, 255, 255, 0.9);
+				padding: 1px;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+				flex-grow: 0;
+			}
+
+			#statusBar {
+				margin-bottom: 10px;
+				display: flex;
+				flex-wrap: wrap;
+				/* 允许自动换行 */
+				justify-content: space-between;
+			}
+
+			#statusBar span {
+				width: 50%;
+				margin-bottom: 4px;
+			}
+
+			#dateTimeInfo {
+				white-space: nowrap;
+				/* 防止文本换行 */
+			}
+
+			.mapButton {
+				position: absolute;
+				top: 10px;
+				right: 10px;
+				padding: 8px 16px;
+				background-color: #8cadf4;
+				color: white;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+				z-index: 9999;
+			}
+
+			#clearButton {
+				top: 10px;
+			}
+
+			#pauseButton {
+				top: 50px;
+			}
+
+			#satelliteButton {
+				top: 90px;
+			}
+
+			#connectButton {
+				top: 130px;
+			}
+
+			#motorContainer {
+				height: 60%;
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-around;
+			}
+
+			.motorRow {
+				width: 100%;
+				display: flex;
+				justify-content: space-around;
+				margin-bottom: 6%;
+			}
+
+
+			#motor1 {
+				margin-top: -5px;
+				/* 将框向上移动5px */
+			}
+
+			#motor2 {
+				margin-top: -5px;
+				/* 将框向上移动5px */
+			}
+
+			.motorBox {
+				width: 42%;
+				height: 100%;
+				border: 1px solid gray;
+				border-radius: 12px;
+
+				display: flex;
+				flex-direction: column;
+				justify-content: flex-start;
+				align-items: center;
+				font-size: 16px;
+				padding: 10px;
+				position: relative;
+				background-color: #aa9386;
+			}
+
+			.motorBox span.box {
+				font-size: 24px;
+				margin-bottom: 5px;
+			}
+
+			.motorBox span {
+				margin-bottom: 2px;
+			}
+
+			.statusDot {
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				position: absolute;
+				bottom: 10px;
+				right: 12px;
+				left: 48px;
+			}
+
+			.statusText {
+				position: absolute;
+				bottom: 6px;
+				left: 80px;
+				color: black;
+			}
+
+
+
+
+			/* 菜单按钮样式 */
+			.menuButton {
+				position: absolute;
+				top: 1%;
+				left: 2%;
+				font-size: 30px;
+				cursor: pointer;
+				z-index: 9999;
+			}
+
+			/* 菜单容器样式 */
+			#menuContainer {
+				position: fixed;
+				top: 50px;
+				/* 菜单向下移动 50px */
+				left: -40%;
+				/* 菜单隐藏在左侧 */
+				width: 40%;
+				height: 100%;
+				background-color: #fff;
+				transition: left 0.3s;
+				/* 添加过渡效果 */
+				z-index: 999;
+				/* 设置一个较高的 z-index */
+			}
+
+
+			/* 菜单列表项样式 */
+			#menuContainer ul {
+				list-style: none;
+				padding: 0;
+			}
+
+			#menuContainer li {
+				margin-bottom: 10px;
+			}
+
+			#menuContainer a {
+				text-decoration: none;
+				color: #333;
+				font-size: 18px;
+				margin-left: 10px;
+			}
+
+			/* 菜单项之间添加横线 */
+			#menuContainer li+li::before {
+				content: '';
+				display: block;
+				border-top: 1px solid #ccc;
+				margin: 10px 0;
+			}
+		</style>
+		<script type="text/javascript"
+			src="http://api.map.baidu.com/api?type=webgl&v=1.0&ak=d1DPSzE2ISf4yimNuIksZzzJ9ayxdprk"></script>
+		<title>水稻直播系统</title>
+	</head>
+	<body>
+		<!-- 菜单按钮 -->
+		<div id="menuButton" class="menuButton">&#9776;</div>
+		<!-- 菜单容器 -->
+		<div id="menuContainer"></div>
+
+
+		<div id="mapContainer">
+			<button id="clearButton" class="mapButton">清除轨迹</button>
+			<button id="pauseButton" class="mapButton">暂停绘制</button>
+			<button id="satelliteButton" class="mapButton">卫星地图</button>
+			<button id="connectButton" class="mapButton">连接服务器</button>
+			<div id="allmap" style="width: 100%; height: 100%;"></div>
+		</div>
+		<div id="infoContainer">
+			<div id="statusBar">
+				<span id="speedInfo">速度: 0</span>
+				<span id="altitudeInfo">海拔高度: 0 米</span>
+				<span id="rtkStateInfo">RTK状态: 0</span>
+				<span id="rtkNumInfo">卫星数量: 0</span>
+				<span id="lngInfo">BD09坐标经度: 106.6186225</span>
+				<span id="latInfo">BD09坐标纬度: 0</span>
+				<span id="dateTimeInfo">日期时间: </span>
+			</div>
+			<div id="motorContainer">
+				<div class="motorRow">
+					<div class="motorBox" id="motor1">
+						<span class="box">1号仓</span>
+						<span id="motor1Speed1">皮带电机: 0</span>
+						<span id="motor1Speed2">干扰电机: 0</span>
+						<div class="statusDot" id="statusDot1"></div>
+						<span class="statusText" id="statusText1"></span>
+					</div>
+					<div class="motorBox" id="motor2">
+						<span class="box">2号仓</span>
+						<span id="motor2Speed1">皮带电机: 100rmp</span>
+						<span id="motor2Speed2">干扰电机: 100rmp</span>
+						<div class="statusDot" id="statusDot2"></div>
+						<span class="statusText" id="statusText2"></span>
+					</div>
+				</div>
+				<div class="motorRow">
+					<div class="motorBox" id="motor3">
+						<span class="box">3号仓</span>
+						<span id="motor3Speed1">皮带电机: 100rmp</span>
+						<span id="motor3Speed2">干扰电机: 100rmp</span>
+						<div class="statusDot" id="statusDot3"></div>
+						<span class="statusText" id="statusText3"></span>
+					</div>
+					<div class="motorBox" id="motor4">
+						<span class="box">4号仓</span>
+						<span id="motor4Speed1">皮带电机: 100rmp</span>
+						<span id="motor4Speed2">干扰电机: 100rmp</span>
+						<div class="statusDot" id="statusDot4"></div>
+						<span class="statusText" id="statusText4"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			var bmap = new BMapGL.Map("allmap"); // 创建地图实例
+			var lastPoint = null; // 上一个位置点
+			var ws = null; // WebSocket 连接对象
+			var isPaused = false; // 是否暂停绘制轨迹
+			var isSatelliteMode = false; // 是否是卫星地图模式
+			// 初始化默认值
+			var speed;
+			var rtkState;
+			var rtkNum;
+			var lng;
+			var lat;
+
+			// 添加地图缩放控件
+			var zoomControl = new BMapGL.ZoomControl();
+			bmap.addControl(zoomControl);
+
+			// 启用双指缩放
+			bmap.enablePinchToZoom();
+
+			// 更新日期和时间信息
+			function updateDateTime() {
+				var now = new Date();
+				var dateStr = now.toLocaleDateString();
+				var timeStr = now.toLocaleTimeString();
+				document.getElementById('dateTimeInfo').textContent = '日期时间: ' + dateStr + ' ' + timeStr;
+			}
+
+			// 初始加载页面时更新一次日期和时间
+			updateDateTime();
+
+			// 每秒更新一次日期和时间
+			setInterval(updateDateTime, 1000);
+
+			// 定义连接服务器函数
+			function connectToServer() {
+				ws = new WebSocket("ws://8.137.81.229:8880");
+
+				// WebSocket连接建立时的回调函数
+				ws.onopen = function() {
+					console.log("WebSocket连接已建立.");
+				};
+
+				// WebSocket接收到消息时的回调函数
+				ws.onmessage = function(event) {
+					// 解析收到的消息数据
+					var data = JSON.parse(event.data);
+
+					// 处理第一条消息，用于显示地图信息
+					if (data.lng !== undefined && data.lat !== undefined) {
+						// 更新地图信息
+						updateMapInfo(data);
+					}
+
+					// 处理第二条消息，用于显示电机转速
+					if (data.S1 !== undefined) {
+						// 更新电机转速信息
+						updateMotorInfo(data);
+					}
+				};
+
+				// WebSocket连接关闭时的回调函数
+				ws.onclose = function() {
+					console.log("WebSocket连接已关闭.");
+				};
+			}
+
+			// 更新地图信息函数
+			function updateMapInfo(data) {
+				speed = data.speed;
+				rtkState = data.rtkstate;
+				rtkNum = data.rtknum;
+				lng = data.lng;
+				lat = data.lat;
+				var altitude = data.altitude || 0;
+
+				// 更新页面显示
+				document.getElementById('speedInfo').textContent = '速度: ' + speed + 'km/h';
+				document.getElementById('rtkStateInfo').textContent = 'RTK状态: ' + getRTKStateText(rtkState);
+				document.getElementById('rtkNumInfo').textContent = '卫星数量: ' + rtkNum;
+				document.getElementById('lngInfo').textContent = 'BD09坐标经度: ' + lng;
+				document.getElementById('latInfo').textContent = 'BD09坐标纬度: ' + lat;
+				document.getElementById('altitudeInfo').textContent = '海拔高度: ' + altitude + '米';
+
+				// 提取经度和纬度
+				var currentPoint = new BMapGL.Point(lng, lat);
+
+				// 如果地图尚未初始化，则将地图中心点设置为接收到的位置
+				if (!bmap.isInitialized) {
+					bmap.centerAndZoom(currentPoint, 17); // 设置地图中心点和缩放级别
+					bmap.isInitialized = true; // 标记地图已初始化
+				}
+
+				// 如果未暂停绘制轨迹，则进行绘制
+				if (!isPaused) {
+					// 创建当前位置点并在地图上标记
+
+					// 使用自定义图标
+					var myIcon = new BMapGL.Icon("img/point.png", new BMapGL.Size(6, 6));
+
+					var marker = new BMapGL.Marker(currentPoint, {
+						icon: myIcon
+					});
+
+					//	var marker = new BMapGL.Marker(currentPoint); // 不指定图标参数，使用默认图标
+					bmap.addOverlay(marker);
+
+					// 设置地图中心点为当前位置
+					bmap.setCenter(currentPoint);
+
+					// 绘制轨迹
+					if (lastPoint !== null) {
+						var polyline = new BMapGL.Polyline([lastPoint, currentPoint], {
+							strokeColor: "red",
+							strokeWeight: 5,
+							strokeOpacity: 0.5
+						}); // 调整轨迹线的粗细为 5
+						bmap.addOverlay(polyline);
+					}
+				}
+
+				// 更新上一个位置点
+				lastPoint = currentPoint;
+			}
+
+			// 根据RTK状态值返回对应的文本
+			function getRTKStateText(rtkState) {
+				switch (rtkState) {
+					case 0:
+						return '无定位';
+					case 1:
+						return '单点定位';
+					case 2:
+						return '亚米级定位';
+					case 4:
+						return 'RTK固定解';
+					case 5:
+						return 'RTK浮动解';
+					default:
+						return '未知';
+				}
+			}
+
+			// 更新电机转速信息函数
+			function updateMotorInfo(data) {
+				document.getElementById('motor1Speed1').textContent = '皮带电机: ' + data.r1 + 'rpm';
+				document.getElementById('motor1Speed2').textContent = '干扰电机: ' + data.r5 + 'rpm';
+				document.getElementById('motor2Speed1').textContent = '皮带电机: ' + data.r2 + 'rpm';
+				document.getElementById('motor2Speed2').textContent = '干扰电机: ' + data.r6 + 'rpm';
+				document.getElementById('motor3Speed1').textContent = '皮带电机: ' + data.r3 + 'rpm';
+				document.getElementById('motor3Speed2').textContent = '干扰电机: ' + data.r7 + 'rpm';
+				document.getElementById('motor4Speed1').textContent = '皮带电机: ' + data.r4 + 'rpm';
+				document.getElementById('motor4Speed2').textContent = '干扰电机: ' + data.r8 + 'rpm';
+
+				updateStatusDot(data.S1, 'statusDot1', 'statusText1');
+				updateStatusDot(data.S2, 'statusDot2', 'statusText2');
+				updateStatusDot(data.S3, 'statusDot3', 'statusText3');
+				updateStatusDot(data.S4, 'statusDot4', 'statusText4');
+			}
+
+			// 更新状态点颜色函数
+			function updateStatusDot(speed, dotId, textId) {
+				var statusDot = document.getElementById(dotId);
+				var statusText = document.getElementById(textId);
+				var color;
+
+				switch (speed) {
+					case 0:
+						color = 'gray';
+						break;
+					case 1:
+						color = 'blue';
+						break;
+					case 2:
+						color = 'green';
+						break;
+					case 3:
+						color = 'red';
+						break;
+					case 4:
+						color = 'orange';
+						break;
+				}
+
+				// 设置状态点颜色
+				statusDot.style.backgroundColor = color;
+
+				// 设置状态文字
+				statusText.textContent = getStatusText(speed);
+			}
+
+			// 更新状态文字
+			function getStatusText(speed) {
+				switch (speed) {
+					case 0:
+						return '离线';
+					case 1:
+						return '通电';
+					case 2:
+						return '正常';
+					case 3:
+						return '故障';
+					case 4:
+						return '缺种子';
+				}
+			}
+
+			// 清除轨迹函数
+			function clearTrack() {
+				bmap.clearOverlays(); // 清除地图上的所有覆盖物
+				lastPoint = null; // 重置上一个位置点
+			}
+
+			// 暂停绘制轨迹函数
+			function pauseDrawing() {
+				isPaused = !isPaused; // 切换暂停状态
+				var pauseButton = document.getElementById('pauseButton');
+				pauseButton.textContent = isPaused ? '继续绘制' : '暂停绘制'; // 更新按钮文本
+			}
+
+
+			// 切换地图到卫星地图模式或普通地图模式
+			function toggleSatelliteMode() {
+				if (isSatelliteMode) {
+					// 切换到普通地图模式
+					bmap.setMapType(BMAP_NORMAL_MAP);
+					isSatelliteMode = false;
+				} else {
+					// 切换到卫星地图模式
+					bmap.setMapType(BMAP_EARTH_MAP);
+					isSatelliteMode = true;
+				}
+			}
+
+			// 页面加载时自动连接服务器
+			connectToServer();
+
+			// 清除轨迹按钮点击事件监听
+			document.getElementById('clearButton').addEventListener('click', clearTrack);
+
+			// 暂停绘制按钮点击事件监听
+			document.getElementById('pauseButton').addEventListener('click', pauseDrawing);
+
+			// 切换地图模式按钮点击事件监听
+			document.getElementById('satelliteButton').addEventListener('click', toggleSatelliteMode);
+
+
+			// 添加连接服务器按钮点击事件处理函数
+			document.getElementById('connectButton').onclick = function() {
+				// 调用连接服务器函数以建立WebSocket连接
+				connectToServer();
+			};
+
+			document.addEventListener('DOMContentLoaded', function() {
+				var menuButton = document.getElementById('menuButton');
+				var menuContainer = document.getElementById('menuContainer');
+				var isMenuVisible = false; // 记录菜单的显示状态，默认为隐藏
+
+				// 添加菜单链接
+				var menuContent = '<ul>' +
+					'<li><a href="index.html">首页</a></li>' +
+					'<li><a href="motor.html">电机控制</a></li>' +
+					'<li><a href="lte.html">配置4G模块</a></li>' +
+					'<li><a href="rtk.html">配置RTK模块</a></li>' +
+					'<li><a href="map.html">地图打点</a></li>' +
+					'</ul>';
+				menuContainer.innerHTML = menuContent;
+
+				// 菜单按钮点击事件处理函数
+				menuButton.addEventListener('click', function() {
+					isMenuVisible = !isMenuVisible; // 反转菜单的显示状态
+					menuContainer.style.left = isMenuVisible ? '0' : '-40%';
+				});
+
+				// 单击其他地方菜单缩回
+				document.addEventListener('click', function(event) {
+					if (event.target !== menuButton && !menuContainer.contains(event.target)) {
+						isMenuVisible = false; // 隐藏菜单
+						menuContainer.style.left = '-40%';
+					}
+				});
+
+				// 单击地图区域时菜单缩回
+				document.getElementById('mapContainer').addEventListener('click', function() {
+					isMenuVisible = false; // 隐藏菜单
+					menuContainer.style.left = '-40%';
+				});
+			});
+		</script>
+	</body>
+</html>
