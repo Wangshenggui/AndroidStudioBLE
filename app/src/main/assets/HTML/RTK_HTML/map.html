@@ -19,14 +19,14 @@
 
 			#mapContainer {
 				width: 100%;
-				height: 50%;
-				/* 设置地图容器高度为屏幕高度的50% */
+				height: 40%;
+				/* 设置地图容器高度为屏幕高度的40% */
 			}
 
 			#infoContainer {
 				width: 100%;
-				height: 50%;
-				/* 设置信息栏高度为屏幕高度的50% */
+				height: 60%;
+				/* 设置信息栏高度为屏幕高度的60% */
 				overflow-y: auto;
 				background-color: rgba(255, 255, 255, 0.9);
 				padding: 1px;
@@ -43,7 +43,7 @@
 
 			#statusBar span {
 				width: 48%;
-				margin-bottom: 8px;
+				margin-bottom: 2px;
 			}
 
 			#dateTimeInfo {
@@ -153,6 +153,20 @@
 				border-top: 1px solid #ccc;
 				margin: 10px 0;
 			}
+
+
+			#bottomButton {
+				position: absolute;
+				bottom: 10px;
+				left: 50%;
+				transform: translateX(-50%);
+				padding: 10px 20px;
+				background-color: #8cadf4;
+				color: white;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+			}
 		</style>
 		<script type="text/javascript"
 			src="http://api.map.baidu.com/api?type=webgl&v=1.0&ak=d1DPSzE2ISf4yimNuIksZzzJ9ayxdprk"></script>
@@ -197,7 +211,9 @@
 			</div>
 
 
-
+			<div id="bottomButtonContainer">
+				<button id="bottomButton">底部按钮</button>
+			</div>
 		</div>
 
 	</body>
@@ -232,6 +248,46 @@
 		var timeStr = now.toLocaleTimeString();
 		document.getElementById('dateTimeInfo').textContent = '日期时间: ' + dateStr + ' ' + timeStr;
 	}
+
+	// 为底部按钮添加单击事件侦听器
+    var bottomButton = document.getElementById('bottomButton');
+    bottomButton.addEventListener('click', function() {
+        // Your custom functionality goes here
+        // alert('底部按钮被点击了！');
+		sendData();
+
+    });
+    // 发送数据的函数
+    function sendData() {
+        // 构建 JSON 对象
+        var data = {
+            n1: 1,
+			n2: 1,
+			n3: 1,
+			n4: 1,
+			z1: 1,
+			z2: 1,
+			z3: 1,
+			z4: 1,
+			s1: 1,
+			s2: 1,
+			s3: 1,
+			s4: 1
+        };
+
+        // 将 JSON 对象转换为字符串
+        var jsonData = JSON.stringify(data);
+
+        // 在控制台输出发送的数据
+        console.log("发送的数据：", jsonData);
+
+        // 发送数据到 WebSocket 服务器
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(jsonData);
+        } else {
+            console.error('WebSocket 连接未打开。');
+        }
+    }
 
 	// 初始加载页面时更新一次日期和时间
 	updateDateTime();
@@ -270,6 +326,8 @@
 		ws.onclose = function() {
 			console.log("WebSocket连接已关闭.");
 		};
+
+
 	}
 
 	// 更新地图信息函数
@@ -547,6 +605,6 @@ function convertToDMS(decimalDegrees) {
 	    return s;  
 	} 
 	
-	
+
 	
 </script>
