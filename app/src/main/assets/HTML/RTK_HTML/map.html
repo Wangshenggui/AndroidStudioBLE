@@ -155,7 +155,7 @@
 			}
 
 
-			#bottomButton {
+			#SettingButton {
 				position: absolute;
 				bottom: 10px;
 				left: 50%;
@@ -211,8 +211,8 @@
 			</div>
 
 
-			<div id="bottomButtonContainer">
-				<button id="bottomButton">底部按钮</button>
+			<div id="SettingButtonContainer">
+				<button id="SettingButton">关闭RTK输出</button>
 			</div>
 		</div>
 
@@ -250,29 +250,28 @@
 	}
 
 	// 为底部按钮添加单击事件侦听器
-    var bottomButton = document.getElementById('bottomButton');
-    bottomButton.addEventListener('click', function() {
+    var SettingButton = document.getElementById('SettingButton');
+    SettingButton.addEventListener('click', function() {
         // Your custom functionality goes here
         // alert('底部按钮被点击了！');
 		sendData();
-
     });
     // 发送数据的函数
     function sendData() {
         // 构建 JSON 对象
         var data = {
-            n1: 1,
-			n2: 1,
-			n3: 1,
-			n4: 1,
-			z1: 1,
-			z2: 1,
-			z3: 1,
-			z4: 1,
-			s1: 1,
-			s2: 1,
-			s3: 1,
-			s4: 1
+            n1: 99,
+			n2: 99,
+			n3: 99,
+			n4: 99,
+			z1: 99,
+			z2: 99,
+			z3: 99,
+			z4: 99,
+			s1: 99,
+			s2: 99,
+			s3: 99,
+			s4: 99
         };
 
         // 将 JSON 对象转换为字符串
