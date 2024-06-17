@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- 设置文档的字符编码和视口 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Connection</title>
+    <!-- 引入自定义的样式表 -->
+    <link rel="stylesheet" href="DotPositioning.css">
+    <!-- 引入百度地图的API -->
+    <script type="text/javascript" src="http://api.map.baidu.com/api?type=webgl&v=1.0&ak=d1DPSzE2ISf4yimNuIksZzzJ9ayxdprk"></script>
+</head>
+<body>
+<main>
+    <!-- 容器，包含地图和按钮 -->
+    <div class="map-container">
+        <!-- 地图容器 -->
+        <div id="map"></div>
+        <!-- 按钮 -->
+        <button id="CenterMapButton">居中地图</button>
+        <!-- 按钮 -->
+        <button id="ClearMapButton">清除地图</button>
+    </div>
+    <!-- 容器，显示信息 -->
+    <div class="message-container">
+        <div class="row">
+            <span id="LonInfo">经度: 0</span>
+            <span id="LatInfo">纬度: 0</span>
+        </div>
+        <div class="row">
+            <span id="m_sInfo">速度(m/s): 0</span>
+            <span id="km_hInfo">速度(km/h): 0</span>
+        </div>
+        <div class="row">
+            <span id="PositModeInfo">定位模式: 0</span>
+        </div>
+    </div>
+    <!-- 发送消息按钮 -->
+    <button id="SaveCoordinateButton">保存当前位置</button>
+</main>
+<!-- 引入自定义的JavaScript脚本 -->
+<script src="DotPositioning.js"></script>
+</body>
+</html>

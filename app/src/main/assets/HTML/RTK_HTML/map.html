@@ -155,18 +155,6 @@
 			}
 
 
-			#SettingButton {
-				position: absolute;
-				bottom: 10px;
-				left: 50%;
-				transform: translateX(-50%);
-				padding: 10px 20px;
-				background-color: #8cadf4;
-				color: white;
-				border: none;
-				border-radius: 4px;
-				cursor: pointer;
-			}
 		</style>
 		<script type="text/javascript"
 			src="http://api.map.baidu.com/api?type=webgl&v=1.0&ak=d1DPSzE2ISf4yimNuIksZzzJ9ayxdprk"></script>
@@ -210,10 +198,6 @@
 				<span id="dateTimeInfo">日期时间: </span>
 			</div>
 
-
-			<div id="SettingButtonContainer">
-				<button id="SettingButton">关闭RTK输出</button>
-			</div>
 		</div>
 
 	</body>
@@ -248,45 +232,6 @@
 		var timeStr = now.toLocaleTimeString();
 		document.getElementById('dateTimeInfo').textContent = '日期时间: ' + dateStr + ' ' + timeStr;
 	}
-
-	// 为底部按钮添加单击事件侦听器
-    var SettingButton = document.getElementById('SettingButton');
-    SettingButton.addEventListener('click', function() {
-        // Your custom functionality goes here
-        // alert('底部按钮被点击了！');
-		sendData();
-    });
-    // 发送数据的函数
-    function sendData() {
-        // 构建 JSON 对象
-        var data = {
-            n1: 99,
-			n2: 99,
-			n3: 99,
-			n4: 99,
-			z1: 99,
-			z2: 99,
-			z3: 99,
-			z4: 99,
-			s1: 99,
-			s2: 99,
-			s3: 99,
-			s4: 99
-        };
-
-        // 将 JSON 对象转换为字符串
-        var jsonData = JSON.stringify(data);
-
-        // 在控制台输出发送的数据
-        console.log("发送的数据：", jsonData);
-
-        // 发送数据到 WebSocket 服务器
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(jsonData);
-        } else {
-            console.error('WebSocket 连接未打开。');
-        }
-    }
 
 	// 初始加载页面时更新一次日期和时间
 	updateDateTime();
