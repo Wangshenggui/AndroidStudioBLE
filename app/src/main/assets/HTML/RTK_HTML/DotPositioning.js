@@ -14,8 +14,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
     socket.addEventListener('message', (event) => {
         try {
             const data = JSON.parse(event.data);  // 解析收到的JSON数据
-            if ('lng' in data && 'lat' in data) {  // 检查是否包含经度和纬度信息
-                updateMap(data.lng, data.lat);  // 更新地图显示位置
+            if ('lon' in data && 'lat' in data) {  // 检查是否包含经度和纬度信息
+
+                var bd09 = wgs84ToBd09(data.lon, data.lat);
+                updateMap(bd09[0], bd09[1]);  // 更新地图显示位置
 
                 //更新信息框
                 updateTextContent(data);
@@ -27,12 +29,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     // 定义更改文本内容的函数
     function updateTextContent(data) {
-        document.getElementById('LonInfo').innerText = '经度: ' + data.lng;
-        document.getElementById('LatInfo').innerText = '纬度: ' + data.lat;
+        var bd09 = wgs84ToBd09(data.lon, data.lat);
+        document.getElementById('LonInfo').innerText = 'lon:' + bd09[0].toFixed(10);
+        document.getElementById('LatInfo').innerText = 'lat:' + bd09[1].toFixed(10);
         document.getElementById('m_sInfo').innerText = '速度(m/s): ' + (data.speed / 3.6).toFixed(4);
         document.getElementById('km_hInfo').innerText = '速度(km/h): ' + data.speed.toFixed(4);
 
-        document.getElementById('PositModeInfo').innerText = '定位模式: ' + getRTKStateText(data.rtkstate);
+        document.getElementById('PositModeInfo').innerText = '定位模式: ' + getRTKStateText(data.rtksta);
     }
 
     // 根据RTK状态值返回对应的文本
@@ -93,9 +96,60 @@ document.addEventListener('DOMContentLoaded', (event) => {
         console.error('WebSocket error:', event);  // 控制台输出WebSocket错误信息
     });
 
+
+    function wgs84ToGcj02(lon, lat) {
+        var pi = 3.1415926535897932384626;
+        var a = 6378245.0;
+        var ee = 0.00669342162296594323;
+
+        function transformLat(x, y) {
+            var ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+            ret += (20.0 * Math.sin(6.0 * x * pi) + 20.0 * Math.sin(2.0 * x * pi)) * 2.0 / 3.0;
+            ret += (20.0 * Math.sin(y * pi) + 40.0 * Math.sin(y / 3.0 * pi)) * 2.0 / 3.0;
+            ret += (160.0 * Math.sin(y / 12.0 * pi) + 320 * Math.sin(y * pi / 30.0)) * 2.0 / 3.0;
+            return ret;
+        }
+
+        function transformLon(x, y) {
+            var ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+            ret += (20.0 * Math.sin(6.0 * x * pi) + 20.0 * Math.sin(2.0 * x * pi)) * 2.0 / 3.0;
+            ret += (20.0 * Math.sin(x * pi) + 40.0 * Math.sin(x / 3.0 * pi)) * 2.0 / 3.0;
+            ret += (150.0 * Math.sin(x / 12.0 * pi) + 300.0 * Math.sin(x / 30.0 * pi)) * 2.0 / 3.0;
+            return ret;
+        }
+
+        var dLat = transformLat(lon - 105.0, lat - 35.0);
+        var dLon = transformLon(lon - 105.0, lat - 35.0);
+        var radLat = lat / 180.0 * pi;
+        var magic = Math.sin(radLat);
+        magic = 1 - ee * magic * magic;
+        var sqrtMagic = Math.sqrt(magic);
+        dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * pi);
+        dLon = (dLon * 180.0) / (a / sqrtMagic * Math.cos(radLat) * pi);
+        var mgLat = lat + dLat;
+        var mgLon = lon + dLon;
+
+        return [mgLon, mgLat];
+    }
+
+    function gcj02ToBd09(lon, lat) {
+        var x_pi = 3.14159265358979324 * 3000.0 / 180.0;
+        var z = Math.sqrt(lon * lon + lat * lat) + 0.00002 * Math.sin(lat * x_pi);
+        var theta = Math.atan2(lat, lon) + 0.000003 * Math.cos(lon * x_pi);
+        var bd_lon = z * Math.cos(theta) + 0.0065;
+        var bd_lat = z * Math.sin(theta) + 0.006;
+
+        return [bd_lon, bd_lat];
+    }
+    function wgs84ToBd09(lon, lat) {
+        var gcj02 = wgs84ToGcj02(lon, lat);
+        return gcj02ToBd09(gcj02[0], gcj02[1]);
+    }
+
+
     // 更新地图显示位置的函数
-    function updateMap(lng, lat) {
-        const point = new BMapGL.Point(lng, lat);  // 创建百度地图的坐标点对象
+    function updateMap(lon, lat) {
+        const point = new BMapGL.Point(lon, lat);  // 创建百度地图的坐标点对象
         if (!map) {  // 如果地图对象不存在
             map = new BMapGL.Map('map');  // 创建新的百度地图对象并指定容器
             map.centerAndZoom(point, 15);  // 设置地图中心点和缩放级别

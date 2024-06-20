@@ -277,7 +277,7 @@
 			var speed;
 			var rtkState;
 			var rtkNum;
-			var lng;
+			var lon;
 			var lat;
 
 			// 添加地图缩放控件
@@ -316,7 +316,7 @@
 					var data = JSON.parse(event.data);
 
 					// 处理第一条消息，用于显示地图信息
-					if (data.lng !== undefined && data.lat !== undefined) {
+					if (data.lon !== undefined && data.lat !== undefined) {
 						// 更新地图信息
 						updateMapInfo(data);
 					}
@@ -333,26 +333,75 @@
 					console.log("WebSocket连接已关闭.");
 				};
 			}
+			function wgs84ToGcj02(lon, lat) {
+				var pi = 3.1415926535897932384626;
+				var a = 6378245.0;
+				var ee = 0.00669342162296594323;
 
+				function transformLat(x, y) {
+					var ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+					ret += (20.0 * Math.sin(6.0 * x * pi) + 20.0 * Math.sin(2.0 * x * pi)) * 2.0 / 3.0;
+					ret += (20.0 * Math.sin(y * pi) + 40.0 * Math.sin(y / 3.0 * pi)) * 2.0 / 3.0;
+					ret += (160.0 * Math.sin(y / 12.0 * pi) + 320 * Math.sin(y * pi / 30.0)) * 2.0 / 3.0;
+					return ret;
+				}
+
+				function transformLon(x, y) {
+					var ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+					ret += (20.0 * Math.sin(6.0 * x * pi) + 20.0 * Math.sin(2.0 * x * pi)) * 2.0 / 3.0;
+					ret += (20.0 * Math.sin(x * pi) + 40.0 * Math.sin(x / 3.0 * pi)) * 2.0 / 3.0;
+					ret += (150.0 * Math.sin(x / 12.0 * pi) + 300.0 * Math.sin(x / 30.0 * pi)) * 2.0 / 3.0;
+					return ret;
+				}
+
+				var dLat = transformLat(lon - 105.0, lat - 35.0);
+				var dLon = transformLon(lon - 105.0, lat - 35.0);
+				var radLat = lat / 180.0 * pi;
+				var magic = Math.sin(radLat);
+				magic = 1 - ee * magic * magic;
+				var sqrtMagic = Math.sqrt(magic);
+				dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * pi);
+				dLon = (dLon * 180.0) / (a / sqrtMagic * Math.cos(radLat) * pi);
+				var mgLat = lat + dLat;
+				var mgLon = lon + dLon;
+
+				return [mgLon, mgLat];
+			}
+
+			function gcj02ToBd09(lon, lat) {
+				var x_pi = 3.14159265358979324 * 3000.0 / 180.0;
+				var z = Math.sqrt(lon * lon + lat * lat) + 0.00002 * Math.sin(lat * x_pi);
+				var theta = Math.atan2(lat, lon) + 0.000003 * Math.cos(lon * x_pi);
+				var bd_lon = z * Math.cos(theta) + 0.0065;
+				var bd_lat = z * Math.sin(theta) + 0.006;
+
+				return [bd_lon, bd_lat];
+			}
+			function wgs84ToBd09(lon, lat) {
+				var gcj02 = wgs84ToGcj02(lon, lat);
+				return gcj02ToBd09(gcj02[0], gcj02[1]);
+			}
 			// 更新地图信息函数
 			function updateMapInfo(data) {
 				speed = data.speed;
-				rtkState = data.rtkstate;
-				rtkNum = data.rtknum;
-				lng = data.lng;
+				rtkState = data.rtksta;
+				rtkNum = data.HCSDS;
+				lon = data.lon;
 				lat = data.lat;
-				var altitude = data.altitude || 0;
+				var alti = data.alti || 0;
+
+				var bd09 = wgs84ToBd09(lon, lat);
 
 				// 更新页面显示
 				document.getElementById('speedInfo').textContent = '速度: ' + speed + 'km/h';
 				document.getElementById('rtkStateInfo').textContent = 'RTK状态: ' + getRTKStateText(rtkState);
 				document.getElementById('rtkNumInfo').textContent = '卫星数量: ' + rtkNum;
-				document.getElementById('lngInfo').textContent = 'BD09经度: ' + lng;
-				document.getElementById('latInfo').textContent = 'BD09纬度: ' + lat;
-				document.getElementById('altitudeInfo').textContent = '海拔高度: ' + altitude + '米';
+				document.getElementById('lngInfo').textContent = 'BD09经度: ' + bd09[0];
+				document.getElementById('latInfo').textContent = 'BD09纬度: ' + bd09[1];
+				document.getElementById('altitudeInfo').textContent = '海拔高度: ' + alti + '米';
 
 				// 提取经度和纬度
-				var currentPoint = new BMapGL.Point(lng, lat);
+				var currentPoint = new BMapGL.Point(bd09[0], bd09[1]);
 
 				// 如果地图尚未初始化，则将地图中心点设置为接收到的位置
 				if (!bmap.isInitialized) {
