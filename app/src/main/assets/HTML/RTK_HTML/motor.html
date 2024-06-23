@@ -38,6 +38,27 @@
 
 
         }
+        #LSpacing10Button {
+            font-size: 18px;
+            /* 增大字体大小 */
+            padding: 1% 40px;
+            background-color: #0055ff;
+
+            position: absolute;
+            left: 60%;
+            top: 60%;
+        }
+
+        #LSpacing20Button {
+            font-size: 18px;
+            /* 增大字体大小 */
+            padding: 1% 40px;
+            background-color: #0055ff;
+
+            position: absolute;
+            left: 60%;
+            top: 70%;
+        }
 
         /* 控制区容器中按钮样式 */
         #selectAllButton {
@@ -436,6 +457,8 @@
 
     <!-- 添加发送按钮 -->
     <button onclick="sendData()" id="sendButton">发送</button>
+    <button onclick="LSpacing10()" id="LSpacing10Button">间距0.1m</button>
+    <button onclick="LSpacing20()" id="LSpacing20Button">间距0.2m</button>
 </div>
 <script type="text/javascript">
     // 定义全局变量
@@ -830,6 +853,61 @@ function sendData() {
     // 发送数据到WebSocket服务器
     ws.send(jsonData);
 }
+
+    // 发送间距的函数
+    function LSpacing10() {
+        // 构建JSON对象
+        var data = {
+            n1: 88,
+            n2: 88,
+            n3: 88,
+            n4: 88,
+            z1: 88,
+            z2: 88,
+            z3: 88,
+            z4: 88,
+            s1: 88,
+            s2: 88,
+            s3: 88,
+            s4: 88
+        };
+
+        // 将JSON对象转换为字符串
+        var jsonData = JSON.stringify(data);
+
+        // 在控制台输出发送的数据
+        console.log("发送的数据：", jsonData);
+
+        // 发送数据到WebSocket服务器
+        ws.send(jsonData);
+    }
+    // 发送间距的函数
+    function LSpacing20() {
+        // 构建JSON对象
+        var data = {
+            n1: 77,
+            n2: 77,
+            n3: 77,
+            n4: 77,
+            z1: 77,
+            z2: 77,
+            z3: 77,
+            z4: 77,
+            s1: 77,
+            s2: 77,
+            s3: 77,
+            s4: 77
+        };
+
+        // 将JSON对象转换为字符串
+        var jsonData = JSON.stringify(data);
+
+        // 在控制台输出发送的数据
+        console.log("发送的数据：", jsonData);
+
+        // 发送数据到WebSocket服务器
+        ws.send(jsonData);
+    }
 </script>
 </body>
 </html>
