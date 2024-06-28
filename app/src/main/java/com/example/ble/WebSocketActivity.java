@@ -1,9 +1,12 @@
 package com.example.ble;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +22,7 @@ public class WebSocketActivity extends AppCompatActivity {
     private static final String TAG = "WebSocketActivity";
     private WebSocket webSocket;
     private TextView RxtextView;
+    Button SendDataButton;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Override
@@ -27,6 +31,7 @@ public class WebSocketActivity extends AppCompatActivity {
         setContentView(R.layout.activity_web_socket);
 
         RxtextView = findViewById(R.id.RxtextView);
+        SendDataButton = (Button)findViewById(R.id.SendDataButton);
 
         OkHttpClient client = new OkHttpClient();
 
@@ -38,7 +43,7 @@ public class WebSocketActivity extends AppCompatActivity {
             @Override
             public void onOpen(WebSocket webSocket, okhttp3.Response response) {
                 Log.d(TAG, "WebSocket 连接已打开");
-                webSocket.send("{\"giuty\":34}");
+//                webSocket.send("{\"giuty\":34}");
             }
 
             @Override
@@ -71,6 +76,25 @@ public class WebSocketActivity extends AppCompatActivity {
                 }
             }
         });
+
+        SendDataButton.setOnClickListener(new View.OnClickListener() {
+            private int counter = 0;
+
+            @Override
+            public void onClick(View v) {
+                // Increment the counter
+                counter++;
+
+                // Create a JSON object with the incremented counter value
+                String json = "{\"giuty\":" + counter + "}";
+
+                // Send the JSON string to the WebSocket server
+                if (webSocket != null) {
+                    webSocket.send(json);
+                }
+            }
+        });
+
 
         // 关闭客户端将在onDestroy中处理
     }
