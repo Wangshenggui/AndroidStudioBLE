@@ -24,9 +24,13 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".WebSocketActivity"
+            android:exported="false"
+            android:label="WenSocket客户端测试" />
+        <activity
             android:name=".SocketActivity"
             android:exported="false"
-            android:label="TCP客户端测试"/>
+            android:label="TCP客户端测试" />
         <activity
             android:name=".NetworkMapActivity"
             android:exported="false"

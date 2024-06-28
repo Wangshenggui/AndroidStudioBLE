@@ -7,4 +7,7 @@
     <item android:id="@+id/TheIdleLoginItem"
         android:title="网页登录"/>
 
+    <item android:id="@+id/WebSocketItem"
+        android:title="WebSocket"/>
+
 </menu>

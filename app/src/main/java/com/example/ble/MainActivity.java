@@ -250,6 +250,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (my_item == R.id.TheIdleLoginItem) {
             intent=new Intent(MainActivity.this,SocketActivity.class);
             startActivity(intent);
+        } else if (my_item == R.id.WebSocketItem) {
+            intent=new Intent(MainActivity.this,WebSocketActivity.class);
+            startActivity(intent);
         }
 
         return true;
